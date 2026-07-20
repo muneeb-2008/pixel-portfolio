@@ -1,55 +1,51 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode driven by next-themes ( <html class="dark"> ) */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* ------------------------------------------------------------------ *
- * Design tokens
- * Near-monochrome, ink-on-warm-paper base with a single restrained
- * accent. Every color is a variable so the palette is a one-line swap.
- * ------------------------------------------------------------------ */
+/* ================================================================== *
+ * Muneeb Qureshi — dark editorial design system
+ * Tokens are CSS variables; the accent is a one-line swap.
+ * ================================================================== */
 :root {
-  --background: #fbfbf9; /* warm paper */
-  --surface: #f3f2ec; /* subtle raised panels / cards */
-  --surface-2: #eceae2; /* pressed / nested surface */
-  --foreground: #111012; /* ink */
-  --muted: #6b6a64; /* secondary text */
-  --faint: #93918a; /* tertiary text / meta */
-  --border: #e5e3da; /* hairlines */
-  --border-strong: #d6d3c8;
-  --accent: #2743ef; /* single accent */
-  --accent-hover: #1c34cf;
-  --accent-contrast: #ffffff; /* text on accent */
-  --accent-soft: rgba(39, 67, 239, 0.08);
+  /* Surfaces */
+  --background: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1c1c1c;
 
-  --radius: 0.875rem;
-  --shadow-soft: 0 1px 2px rgba(17, 16, 18, 0.04),
-    0 8px 24px -12px rgba(17, 16, 18, 0.12);
-  --shadow-lift: 0 2px 4px rgba(17, 16, 18, 0.05),
-    0 24px 48px -20px rgba(17, 16, 18, 0.22);
+  /* Ink */
+  --foreground: #fafafa;
+  --muted: #a1a1aa; /* secondary */
+  --faint: #8a8a93; /* tertiary / meta (AA-safe on #0a0a0a) */
+
+  /* Hairlines */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Single accent — electric cyan */
+  --accent: #6ae8ff;
+  --accent-hover: #8ceeff;
+  --accent-contrast: #06131a; /* ink on accent */
+  --accent-soft: rgba(106, 232, 255, 0.1);
+
+  /* Radii */
+  --radius-sm: 0.5rem; /* 8  */
+  --radius: 1rem; /* 16 */
+  --radius-lg: 1.5rem; /* 24 */
+  --radius-xl: 2rem; /* 32 */
+
+  /* Soft elevation only */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.5), 0 40px 80px -32px rgba(0, 0, 0, 0.85);
+
+  /* Named easings */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.43, 0.195, 0.02, 1.02);
+
+  /* Layout */
+  --container: 1440px;
 }
 
-.dark {
-  --background: #0a0a0b;
-  --surface: #141416;
-  --surface-2: #1c1c20;
-  --foreground: #f4f3ef;
-  --muted: #a2a099;
-  --faint: #6f6d67;
-  --border: #232327;
-  --border-strong: #2f2f35;
-  --accent: #6b83ff;
-  --accent-hover: #859aff;
-  --accent-contrast: #0a0a0b;
-  --accent-soft: rgba(107, 131, 255, 0.12);
-
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4),
-    0 8px 24px -12px rgba(0, 0, 0, 0.6);
-  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.5),
-    0 28px 56px -20px rgba(0, 0, 0, 0.7);
-}
-
-/* Expose tokens to Tailwind utilities (bg-background, text-muted, etc.) */
+/* Expose tokens to Tailwind utilities */
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -64,20 +60,22 @@
   --color-accent-contrast: var(--accent-contrast);
   --color-accent-soft: var(--accent-soft);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-sora);
+  --font-mono: var(--font-jetbrains);
 
-  --radius-lg: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
 
 /* ------------------------------------------------------------------ *
  * Base
  * ------------------------------------------------------------------ */
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 6rem; /* clears the sticky nav on anchor jumps */
+  /* Lenis drives smooth scroll; keep padding for the reduced-motion path. */
+  scroll-padding-top: 6rem;
   -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
 }
 
 body {
@@ -88,6 +86,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
 }
 
 ::selection {
@@ -95,28 +106,126 @@ body {
   color: var(--accent-contrast);
 }
 
-/* Refined focus ring */
 :where(a, button, input, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
   border-radius: 4px;
 }
 
-/* Slim, theme-aware scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
 }
 
-/* Utility: editorial serif italic accent */
-.font-serif-italic {
-  font-family: var(--font-serif), Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
+/* Fixed film-grain overlay — subtle texture, non-interactive */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Honor reduced-motion at the platform level as a safety net.
-   Component-level motion also checks useReducedMotion(). */
+/* ------------------------------------------------------------------ *
+ * Editorial type scale (display = Sora)
+ * ------------------------------------------------------------------ */
+.text-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.75rem, 1.2rem + 7vw, 6.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+.text-h1 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 1.2rem + 4.4vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.text-h2 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.85rem, 1.1rem + 2.9vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+.text-h3 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.3rem, 1rem + 1.1vw, 1.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.text-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--faint);
+}
+
+/* Measure control for reading comfort */
+.measure {
+  max-width: 62ch;
+}
+
+/* ------------------------------------------------------------------ *
+ * Reusable premium interactions (respect reduced-motion below)
+ * ------------------------------------------------------------------ */
+
+/* Dark/accent fill slides up on hover; content inverts */
+.fill-hover {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.35s var(--ease-out-expo);
+}
+.fill-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: translateY(101%);
+  transition: transform 0.5s var(--ease-out-expo);
+}
+.fill-hover:hover::before,
+.fill-hover:focus-visible::before {
+  transform: translateY(0);
+}
+.fill-hover:hover,
+.fill-hover:focus-visible {
+  color: var(--accent-contrast);
+  border-color: transparent;
+}
+
+/* Animated link underline */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease-out-expo);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion — platform-level safety net
+ * ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

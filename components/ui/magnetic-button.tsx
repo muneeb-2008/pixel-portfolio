@@ -15,10 +15,11 @@ type MagneticButtonProps = {
   variant?: "primary" | "ghost";
   external?: boolean;
   className?: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
 /**
- * A CTA link that subtly leans toward the cursor, then springs back.
+ * A CTA link that leans toward the cursor, then springs back.
  * Disabled under prefers-reduced-motion.
  */
 export function MagneticButton({
@@ -27,13 +28,14 @@ export function MagneticButton({
   variant = "primary",
   external = false,
   className,
+  onClick,
 }: MagneticButtonProps) {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLAnchorElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 260, damping: 18, mass: 0.5 });
-  const springY = useSpring(y, { stiffness: 260, damping: 18, mass: 0.5 });
+  const springX = useSpring(x, { stiffness: 300, damping: 22, mass: 0.8 });
+  const springY = useSpring(y, { stiffness: 300, damping: 22, mass: 0.8 });
 
   function handleMove(e: React.MouseEvent<HTMLAnchorElement>) {
     if (reduce || !ref.current) return;
@@ -49,19 +51,20 @@ export function MagneticButton({
 
   const variantStyles =
     variant === "primary"
-      ? "bg-accent text-accent-contrast hover:bg-accent-hover shadow-[0_10px_30px_-12px_var(--accent)]"
-      : "border border-border text-foreground hover:border-border-strong hover:bg-surface";
+      ? "bg-accent text-accent-contrast hover:bg-accent-hover shadow-[0_16px_40px_-16px_var(--accent)]"
+      : "border border-border-strong text-foreground hover:bg-surface";
 
   return (
     <motion.a
       ref={ref}
       href={href}
+      onClick={onClick}
       onMouseMove={handleMove}
       onMouseLeave={reset}
       style={{ x: springX, y: springY }}
       {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
       className={cn(
-        "group relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors duration-200",
+        "group inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors duration-200",
         variantStyles,
         className,
       )}

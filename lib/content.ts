@@ -1,7 +1,7 @@
 /**
  * Single source of truth for all site content.
- * Swap the placeholder projects, stats, and social links below for the
- * real ones — no component code needs to change.
+ * Swap the placeholder projects, testimonials, experience, and social
+ * links below for the real ones — no component code needs to change.
  */
 
 export type HeadlineSegment = { text: string; accent?: boolean };
@@ -21,7 +21,7 @@ export type Project = {
   role: string;
   tags: string[];
   metric: { value: string; label: string };
-  /** Hue (0–360) used to tint the placeholder cover. Keep low-key. */
+  /** Hue (0–360) used to tint the placeholder cover. */
   hue: number;
 };
 
@@ -41,6 +41,19 @@ export type ProcessStep = {
   step: string;
   title: string;
   body: string;
+};
+
+export type ExperienceItem = {
+  period: string;
+  role: string;
+  org: string;
+  blurb: string;
+};
+
+export type Testimonial = {
+  quote: string;
+  name: string;
+  title: string;
 };
 
 /* NOTE: LinkedIn / X / Dribbble URLs below are placeholders — replace the
@@ -71,21 +84,28 @@ export const profile = {
   brandStatement:
     "I design digital products, websites, and design systems that help businesses create better user experiences and stronger products.",
   metaDescription:
-    "Muneeb Qureshi is a product designer, UI/UX designer, and Framer developer in Karachi — designing premium digital products, websites, and design systems from strategy to implementation.",
+    "Muneeb Qureshi is a product designer and Framer developer in Karachi, designing premium digital products, websites, and design systems — from strategy to a shipped, systemised interface.",
   heroEyebrow: "Product Designer · UI/UX · Framer",
   heroHeadline: [
-    { text: "Designing digital products that feel " },
+    { text: "Designing digital products" },
+    { text: "that feel " },
     { text: "effortless", accent: true },
-    { text: " — and perform like systems." },
+    { text: " — and" },
+    { text: "perform like systems." },
   ] satisfies HeadlineSegment[],
+  /** Grouped by visual line for the line-by-line reveal. */
+  heroHeadlineLines: [
+    [{ text: "Designing digital products" }],
+    [{ text: "that feel " }, { text: "effortless", accent: true }],
+    [{ text: "— and perform like systems." }],
+  ] satisfies HeadlineSegment[][],
   heroSub:
-    "I'm Muneeb, a product designer and Framer developer based in Karachi. I help startups and SaaS teams turn complex problems into clear, premium experiences — from strategy to shipped interface.",
+    "I'm Muneeb — a product designer and Framer developer in Karachi. I help startups and SaaS teams turn complex problems into clear, premium experiences, from strategy to a shipped interface.",
   heroStats: [
     { value: "6+", label: "Years designing products" },
     { value: "40+", label: "Products & features shipped" },
     { value: "12", label: "Industries served" },
   ],
-  /** Audience categories shown as a quiet marquee under the hero. */
   worksWith: ["Startups", "SaaS", "AI products", "Product teams", "Agencies"],
   socials,
 };
@@ -93,7 +113,7 @@ export const profile = {
 export const navLinks = [
   { label: "Work", href: "#work" },
   { label: "Skills", href: "#skills" },
-  { label: "Philosophy", href: "#philosophy" },
+  { label: "Process", href: "#process" },
   { label: "About", href: "#about" },
 ];
 
@@ -108,43 +128,43 @@ export const projects: Project[] = [
     slug: "helio",
     name: "Helio",
     tagline:
-      "Turning a data-heavy analytics platform into a calm, decision-first dashboard.",
+      "Turning a data-heavy analytics platform into a calm, decision-first dashboard that teams actually act on.",
     category: "SaaS · Product Design",
     year: "2025",
     role: "Product Design, UX, Design System",
     tags: ["Product Design", "UX", "Design System"],
     metric: { value: "+38%", label: "activation" },
-    hue: 230,
+    hue: 190,
   },
   {
     slug: "lumen-ai",
     name: "Lumen AI",
     tagline:
-      "An AI writing workspace designed to keep humans confidently in control.",
+      "An AI writing workspace designed to keep humans confidently in control of the output.",
     category: "AI · Product Design",
     year: "2025",
     role: "Product Design, UI, Motion",
     tags: ["Product Design", "UI Design", "Motion"],
     metric: { value: "2.1×", label: "faster drafting" },
-    hue: 275,
+    hue: 265,
   },
   {
     slug: "northwind",
     name: "Northwind",
     tagline:
-      "Rebuilding a fintech onboarding flow to cut drop-off and earn trust early.",
+      "Rebuilding a fintech onboarding flow to cut drop-off and earn trust in the first minute.",
     category: "Fintech · UX",
     year: "2024",
     role: "UX, UI, Prototyping",
     tags: ["UX Design", "UI Design", "Prototyping"],
     metric: { value: "−41%", label: "onboarding drop-off" },
-    hue: 160,
+    hue: 150,
   },
   {
     slug: "atlas",
     name: "Atlas Design System",
     tagline:
-      "A scalable design system unifying five products under one visual language.",
+      "A scalable design system unifying five products under one confident visual language.",
     category: "Design System · Framer",
     year: "2024",
     role: "Design Systems, Framer, Branding",
@@ -187,7 +207,7 @@ export const capabilities = {
 };
 
 export const philosophy = {
-  eyebrow: "Design philosophy",
+  eyebrow: "Product thinking",
   heading: "Good design should feel effortless — and be anything but accidental.",
   principles: [
     {
@@ -223,16 +243,6 @@ export const philosophy = {
   ] satisfies Principle[],
 };
 
-export const about = {
-  eyebrow: "About",
-  lead: "I design digital products, websites, design systems, and brand identities that pair business strategy with an exceptional user experience.",
-  paragraphs: [
-    "Based in Karachi, I work with startups, SaaS companies, and product teams to solve complex product problems through thoughtful UX, clean interfaces, and scalable systems.",
-    "I care about the thinking behind the pixels: how a product is positioned, how a flow removes friction, how a system stays coherent as it grows. Design should feel effortless, communicate clearly, and support measurable business outcomes.",
-    "I move fluidly across strategy, design, and implementation — prototyping and building in Framer, and folding AI-assisted workflows into my process to get from idea to polished interface faster, without losing craft.",
-  ],
-};
-
 export const process = {
   eyebrow: "How I work",
   heading: "A clear path from problem to shipped product.",
@@ -258,6 +268,86 @@ export const process = {
       body: "Prototype, refine, and ship — built in Framer or handed off engineering-ready.",
     },
   ] satisfies ProcessStep[],
+};
+
+export const experience = {
+  eyebrow: "Experience",
+  heading: "Six years shaping products across industries.",
+  /* Companies are placeholders — replace with real roles. */
+  items: [
+    {
+      period: "2023 — Now",
+      role: "Senior Product Designer",
+      org: "Independent / Contract",
+      blurb:
+        "Designing SaaS and AI products end-to-end for startups and scale-ups — strategy, UX, UI, and Framer build.",
+    },
+    {
+      period: "2021 — 2023",
+      role: "Product Designer",
+      org: "Studio (placeholder)",
+      blurb:
+        "Led UX and UI for web apps and marketing sites across fintech and SaaS, from research to handoff.",
+    },
+    {
+      period: "2019 — 2021",
+      role: "UI/UX Designer",
+      org: "Agency (placeholder)",
+      blurb:
+        "Shipped design systems and responsive interfaces for early-stage products and their brands.",
+    },
+    {
+      period: "2018 — 2019",
+      role: "Visual & Brand Designer",
+      org: "Freelance",
+      blurb:
+        "Built brand identities and high-converting landing pages for founders and small teams.",
+    },
+  ] satisfies ExperienceItem[],
+};
+
+export const testimonials = {
+  eyebrow: "Kind words",
+  heading: "What teams say about working together.",
+  /* Placeholder quotes — replace with real, attributed testimonials. */
+  items: [
+    {
+      quote:
+        "Muneeb thinks like a product owner, not just a designer. He shipped a clarity we didn't know we were missing.",
+      name: "Founder",
+      title: "Early-stage SaaS",
+    },
+    {
+      quote:
+        "The most detail-obsessed designer we've worked with. Every interaction felt considered and intentional.",
+      name: "Head of Product",
+      title: "Fintech",
+    },
+    {
+      quote:
+        "He turned a vague idea into a system our engineers could build in days, not weeks.",
+      name: "CTO",
+      title: "AI startup",
+    },
+    {
+      quote:
+        "A rare mix of strategy, craft, and speed. The kind of designer you want in the room early.",
+      name: "Design Lead",
+      title: "Product agency",
+    },
+  ] satisfies Testimonial[],
+};
+
+export const about = {
+  eyebrow: "About",
+  lead: "I design digital products, websites, design systems, and brand identities that pair business strategy with an exceptional user experience.",
+  paragraphs: [
+    "Based in Karachi, I work with startups, SaaS companies, and product teams to solve complex product problems through thoughtful UX, clean interfaces, and scalable systems.",
+    "I care about the thinking behind the pixels: how a product is positioned, how a flow removes friction, how a system stays coherent as it grows. Design should feel effortless, communicate clearly, and support measurable business outcomes.",
+    "I move fluidly across strategy, design, and implementation — prototyping and building in Framer, and folding AI-assisted workflows into my process to get from idea to polished interface faster, without losing craft.",
+  ],
+  focus:
+    "Currently focused on AI product interfaces and design systems for early-stage teams.",
 };
 
 export const contact = {

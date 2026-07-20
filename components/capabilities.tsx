@@ -5,42 +5,42 @@ import { Reveal } from "@/components/ui/reveal";
 
 export function Capabilities() {
   return (
-    <SectionShell id="skills" className="border-y border-border bg-surface/40">
+    <SectionShell
+      id="skills"
+      aria-labelledby="skills-heading"
+      className="border-y border-border bg-surface/30"
+    >
       <Reveal>
         <div className="max-w-3xl">
           <Eyebrow>{capabilities.eyebrow}</Eyebrow>
-          <h2 className="mt-5 text-balance text-3xl font-medium leading-[1.1] tracking-[-0.02em] sm:text-4xl md:text-5xl">
+          <h2 id="skills-heading" className="text-h2 mt-5 text-balance">
             {capabilities.heading}
           </h2>
         </div>
       </Reveal>
 
-      <div className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
+      <div className="mt-16 lg:mt-20">
         {capabilities.groups.map((group, i) => (
-          <Reveal key={group.group} delay={i * 0.08} className="bg-background">
-            <div className="flex h-full flex-col p-6 md:p-8">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-                  {group.group}
-                </span>
-                <span className="font-mono text-xs text-faint">
+          <Reveal key={group.group} delay={i * 0.05}>
+            <div className="grid grid-cols-1 gap-6 border-t border-border py-10 lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-4">
+                <span className="font-mono text-sm text-accent">
                   0{i + 1}
                 </span>
+                <h3 className="text-h3 mt-3">{group.group}</h3>
+                <p className="mt-2 text-sm text-faint">{group.caption}</p>
               </div>
-              <p className="mt-3 text-sm text-faint">{group.caption}</p>
-              <ul className="mt-6">
-                {group.items.map((item) => (
-                  <li
-                    key={item}
-                    className="group/item flex items-center justify-between border-t border-border py-3.5 text-[15px] transition-colors"
-                  >
-                    <span className="text-foreground">{item}</span>
-                    <span className="text-border-strong transition-colors group-hover/item:text-accent">
-                      +
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <div className="lg:col-span-8">
+                <ul className="flex flex-wrap gap-3">
+                  {group.items.map((item) => (
+                    <li key={item}>
+                      <span className="fill-hover inline-flex cursor-default rounded-full border border-border-strong px-5 py-2.5 text-sm font-medium text-foreground md:text-base">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </Reveal>
         ))}

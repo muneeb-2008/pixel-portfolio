@@ -6,19 +6,30 @@ import { ArrowUpRight } from "@/components/ui/icons";
 
 export function Contact() {
   return (
-    <section id="contact" className="relative scroll-mt-24 overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute bottom-[-30%] left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,var(--accent-soft),transparent_62%)] blur-2xl" />
+    <section
+      id="contact"
+      aria-labelledby="contact-heading"
+      className="relative scroll-mt-24 overflow-hidden"
+    >
+      {/* Off-center accent glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute -left-40 bottom-[-30%] h-[38rem] w-[38rem] rounded-full blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle at center, var(--accent-soft), transparent 64%)",
+          }}
+        />
       </div>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-28 md:px-8 md:py-40">
+      <div className="mx-auto w-full max-w-[1440px] px-6 py-28 sm:px-8 md:py-40 lg:px-16">
         <Reveal>
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <Eyebrow>{contact.eyebrow}</Eyebrow>
-            <h2 className="mt-6 text-balance text-4xl font-medium leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl">
+            <h2 id="contact-heading" className="text-display mt-6 text-balance">
               {contact.heading.map((seg, i) =>
                 seg.accent ? (
-                  <span key={i} className="font-serif-italic">
+                  <span key={i} className="text-accent">
                     {seg.text}
                   </span>
                 ) : (
@@ -26,18 +37,18 @@ export function Contact() {
                 ),
               )}
             </h2>
-            <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted md:text-lg">
+            <p className="measure mt-8 text-lg leading-relaxed text-muted">
               {contact.body}
             </p>
 
-            <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+            <div className="mt-10 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
               <MagneticButton href={`mailto:${profile.email}`}>
                 Start a project
                 <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </MagneticButton>
               <a
                 href={`mailto:${profile.email}`}
-                className="text-sm text-muted underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                className="link-underline text-base text-muted transition-colors hover:text-foreground"
               >
                 {profile.email}
               </a>
@@ -46,7 +57,7 @@ export function Contact() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="mt-16 flex flex-wrap gap-x-8 gap-y-4 border-t border-border pt-8">
+          <div className="mt-16 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-8">
             {profile.socials
               .filter((s) => s.label !== "Email")
               .map((social) => (
