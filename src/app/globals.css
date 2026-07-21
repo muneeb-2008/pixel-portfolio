@@ -1,0 +1,324 @@
+@import "tailwindcss";
+
+/* ==================================================================
+ * INTELLIGENCE IN MOTION — design tokens
+ * A bright product environment. Every value lives here; components
+ * reference tokens and never hard-code colour or spacing.
+ * ================================================================== */
+:root {
+  /* --- Ground ------------------------------------------------------ */
+  --bg: #ffffff;
+  --surface: #f4fafe;
+
+  /* --- Ink --------------------------------------------------------- */
+  --ink: #101820;
+  --ink-2: #62717b; /* 5.1:1 on white — AA for body */
+
+  /* --- Blue -------------------------------------------------------- */
+  --blue: #87cefa; /* brand signal: surfaces, lines, indicators */
+  --blue-strong: #4fafe8; /* interaction: active edges, meters */
+  /*  #87CEFA is 1.7:1 on white and #4FAFE8 is 2.5:1 — neither can carry
+      text. --blue-ink is the only blue allowed on type (5.9:1, AA). */
+  --blue-ink: #1668a3;
+
+  --blue-field: rgba(135, 206, 250, 0.16); /* soft surfaces */
+  --blue-selected: rgba(135, 206, 250, 0.32); /* selected state */
+  --blue-line: rgba(135, 206, 250, 0.55); /* connectors, grid */
+  --blue-grid: rgba(135, 206, 250, 0.28);
+
+  /* --- Structure --------------------------------------------------- */
+  --line: rgba(16, 24, 32, 0.12);
+  --line-soft: rgba(16, 24, 32, 0.06);
+
+  /* --- Typography -------------------------------------------------- */
+  --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-utility), ui-monospace, monospace;
+
+  --t-display: clamp(2.5rem, 1rem + 4.4vw, 5rem);
+  --t-h1: clamp(2rem, 1rem + 3.4vw, 3.75rem);
+  --t-h2: clamp(1.625rem, 1rem + 2.4vw, 2.75rem);
+  --t-h3: clamp(1.1875rem, 1rem + 0.9vw, 1.5rem);
+  --t-lead: clamp(1.125rem, 1rem + 0.6vw, 1.4375rem);
+  /* Body floor: 16px mobile → 18px desktop */
+  --t-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --t-small: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  --t-label: 0.8125rem; /* mono only */
+
+  --lh-tight: 0.98;
+  --lh-snug: 1.1;
+  --lh-body: 1.62;
+  --tr-tight: -0.03em;
+  --tr-label: 0.14em;
+
+  /* --- Spacing (4px base) ------------------------------------------ */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+  --s-24: 6rem;
+  --s-32: 8rem;
+
+  /* --- Grid & containers ------------------------------------------- */
+  --container: 1600px;
+  --gutter: clamp(1.25rem, 3.6vw, 4.5rem);
+  --cols: 12;
+
+  /* --- Radius (0–16px, by purpose) --------------------------------- */
+  --r-0: 0px;
+  --r-sm: 4px; /* controls, chips */
+  --r-md: 8px; /* interface regions */
+  --r-lg: 16px; /* the product surface itself */
+
+  /* --- Elevation — only to separate layers, never decoration ------- */
+  --lift-1: 0 1px 2px rgba(16, 24, 32, 0.04), 0 8px 24px -12px rgba(16, 24, 32, 0.12);
+  --lift-2: 0 2px 6px rgba(16, 24, 32, 0.05), 0 24px 60px -28px rgba(16, 24, 32, 0.22);
+
+  /* --- Motion ------------------------------------------------------ */
+  --dur-fast: 140ms;
+  --dur: 260ms;
+  --dur-slow: 520ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Z-index ----------------------------------------------------- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-lens: 20;
+  --z-nav: 50;
+  --z-menu: 60;
+  --z-skip: 100;
+}
+
+/* Breakpoints (Tailwind defaults): sm 640 · md 768 · lg 1024 · xl 1280 */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-blue: var(--blue);
+  --color-blue-strong: var(--blue-strong);
+  --color-blue-ink: var(--blue-ink);
+  --color-blue-field: var(--blue-field);
+  --color-blue-selected: var(--blue-selected);
+  --color-blue-line: var(--blue-line);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+/* ==================================================================
+ * Base
+ * ================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--tr-tight);
+  line-height: var(--lh-snug);
+}
+
+p {
+  margin: 0;
+}
+
+::selection {
+  background: var(--blue-selected);
+  color: var(--ink);
+}
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--blue-ink);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+/* ==================================================================
+ * Layout primitives
+ * ================================================================== */
+.shell {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.grid-editorial {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+/* Fine blue grid — structural depth on white, never a texture */
+.blue-grid {
+  background-image:
+    linear-gradient(to right, var(--blue-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--blue-grid) 1px, transparent 1px);
+  background-size: clamp(56px, 7vw, 104px) clamp(56px, 7vw, 104px);
+}
+
+/* Thin blue connector between an annotation and an interface region */
+.connector {
+  background: var(--blue-line);
+  transform-origin: left center;
+}
+
+/* ==================================================================
+ * Type utilities
+ * ================================================================== */
+.t-display {
+  font-family: var(--font-display);
+  font-size: var(--t-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-tight);
+  font-weight: 500;
+}
+.t-h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-tight);
+}
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-tight);
+}
+.t-h3 {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  line-height: 1.24;
+  letter-spacing: -0.018em;
+}
+.t-lead {
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* Mono — product metadata, interface labels, annotations, system states */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.measure {
+  max-width: 46ch;
+}
+.measure-wide {
+  max-width: 60ch;
+}
+
+/* ==================================================================
+ * Annotation system
+ * ================================================================== */
+.annotation {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  line-height: 1.5;
+  color: var(--ink-2);
+  border-left: 2px solid var(--blue);
+  padding-left: var(--s-3);
+}
+.annotation strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+/* Decision fragment — hero motif through to contact */
+.fragment {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition:
+    color var(--dur) var(--ease-out),
+    opacity var(--dur) var(--ease-out);
+}
+.fragment[data-state="active"] {
+  color: var(--blue-ink);
+}
+
+/* ==================================================================
+ * Skip link
+ * ================================================================== */
+.skip-link {
+  position: fixed;
+  top: var(--s-4);
+  left: var(--s-4);
+  z-index: var(--z-skip);
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  text-decoration: none;
+  border-radius: var(--r-sm);
+  transform: translateY(-200%);
+  transition: transform var(--dur) var(--ease-out);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ==================================================================
+ * Reduced motion — all content stays visible and reachable
+ * ================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,65 +1,57 @@
-# Muneeb Qureshi — Portfolio
+# Muneeb Qureshi — portfolio concept
 
-A premium, single-page portfolio for **Muneeb Qureshi** — Product Designer, UI/UX Designer, and Framer Developer. Dark, editorial, and motion-forward: built to feel like a modern software product.
+**HUMAN CONTROL** — the first approved concept for an AI Product Designer
+portfolio. This is a foundation and a creative prototype, not the finished
+site.
 
-Built with **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS v4**, **Motion (Framer Motion)**, and **Lenis** smooth scroll.
+Built with Next.js 16 (App Router), TypeScript, and Tailwind CSS v4.
+**No runtime dependencies were added** beyond the framework.
 
-## Getting started
+## Run it
 
 ```bash
 npm install
-npm run dev
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+`npm run build` · `npm run start` · `npm run lint` · `npx tsc --noEmit`
 
-Other scripts: `npm run build` (production build), `npm run start` (serve the build), `npm run lint`.
+## What is built
 
-## Editing content
+Global foundation · navigation · hero · one demo featured project ·
+the **Decision Lens** signature interaction · contact transition.
 
-**All copy, case studies, testimonials, and experience live in one file: [`lib/content.ts`](lib/content.ts).** Change the site by editing that file — no component code needs to change.
+Deliberately **not** built yet: testimonials, process, experience, services,
+skills, blog, full case studies, multiple projects, footer columns, awards,
+client logos. Those follow once the art direction is approved.
 
-- `profile` — name, roles, location, email, hero headline (line-by-line), sub, availability, stats, social links.
-- `projects` — the case-study cards (realistic **placeholders**). Swap `name`, `tagline`, `metric`, `tags`, etc. `hue` (0–360) tints each card's placeholder cover.
-- `capabilities`, `philosophy`, `process`, `experience`, `testimonials`, `about`, `contact` — the remaining sections.
+## ⚠️ All project content is demo content
 
-> ⚠️ The LinkedIn / X / Dribbble URLs in `socials`, the `experience` companies, and the `testimonials` are placeholders — replace them with real content. Email is live.
+**Clarity AI is fictional.** There is no client, no engagement, and no
+measured result anywhere on this site. The outcome is labelled "Demo outcome"
+and stays qualitative on purpose.
 
-### Adding real images
+Availability, the LinkedIn URL, and the domain are placeholders.
+See [`docs/03-content-todo.md`](docs/03-content-todo.md).
 
-Drop assets into [`public/`](public) and reference them from a section component (e.g. swap the placeholder cover in [`components/work-card.tsx`](components/work-card.tsx) or the portrait block in [`components/about.tsx`](components/about.tsx) for a `next/image`).
+## Editing
 
-## Design system
+All copy lives in two files — no component needs changing:
 
-Dark-first, single cyan accent. All tokens are CSS variables in [`app/globals.css`](app/globals.css) — change `--accent` and it propagates everywhere. Fonts are configured in [`app/layout.tsx`](app/layout.tsx):
+- [`src/content/site.ts`](src/content/site.ts) — name, positioning, nav, hero,
+  the eight decision fragments, about, contact
+- [`src/content/projects.ts`](src/content/projects.ts) — the featured project
+  and the Decision Lens scenario
 
-- **Display:** Sora (a stand-in for General Sans / Satoshi — drop the real files in via `next/font/local` when licensed)
-- **Body:** Inter · **Mono:** JetBrains Mono
+Design tokens are CSS custom properties in
+[`src/app/globals.css`](src/app/globals.css). Change `--signal` and the accent
+updates everywhere.
 
-Editorial type is exposed as `.text-display / .text-h1 / .text-h2 / .text-h3 / .text-eyebrow`; premium interactions as `.fill-hover` and `.link-underline`. Motion presets (springs, easings, line-reveal variants) live in [`lib/motion.ts`](lib/motion.ts).
+## Docs
 
-## Motion & accessibility
-
-- A one-time **loader** ([`components/loader.tsx`](components/loader.tsx)) and **Lenis** smooth scroll ([`components/providers/smooth-scroll.tsx`](components/providers/smooth-scroll.tsx)).
-- Everything respects `prefers-reduced-motion`: Lenis and the loader are disabled, and animations fall back to static.
-- Semantic landmarks, one `h1`, skip link, visible focus rings, WCAG-AA contrast, 44px touch targets.
-
-## SEO
-
-Metadata + canonical in [`app/layout.tsx`](app/layout.tsx), JSON-LD `Person` schema, dynamic OG image ([`app/opengraph-image.tsx`](app/opengraph-image.tsx)), generated favicon ([`app/icon.tsx`](app/icon.tsx)), `robots.txt`, and `sitemap.xml`. Update the domain in `metadataBase`, `robots.ts`, and `sitemap.ts` before launch.
-
-## Structure
-
-```
-app/            layout (fonts, providers, metadata, JSON-LD), page (section order),
-                globals.css, robots.ts, sitemap.ts, opengraph-image.tsx, icon.tsx
-components/      one file per section: nav, hero, work(+work-card), capabilities,
-                philosophy, process, experience, testimonials, about, contact, footer, loader
-components/ui/   reusable primitives (Reveal, SectionShell, MagneticButton, Pill, Eyebrow, icons)
-components/providers/  smooth-scroll (Lenis)
-lib/            content.ts (all copy), motion.ts (variants/springs), utils.ts, use-anchor-scroll.ts
-```
-
-## Deploy
-
-Deploy-agnostic. For Vercel: push to a Git repo and import it — no config needed. Update the domain in `metadataBase` (`app/layout.tsx`), `app/robots.ts`, and `app/sitemap.ts`.
+| | |
+|---|---|
+| [01-foundation.md](docs/01-foundation.md) | Stack, tokens, motion and performance policy |
+| [02-art-direction.md](docs/02-art-direction.md) | The concept, type, colour, composition |
+| [03-content-todo.md](docs/03-content-todo.md) | Everything that must be replaced |
+| [04-prototype-review.md](docs/04-prototype-review.md) | Screenshot review, the fixes it forced, a11y results |
