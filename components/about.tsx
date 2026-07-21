@@ -30,7 +30,7 @@ export function About() {
               <span className="font-display text-7xl font-bold text-foreground/85">
                 MQ
               </span>
-              <span className="absolute bottom-4 left-4 rounded-full border border-border bg-background/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-faint backdrop-blur">
+              <span className="absolute bottom-4 left-4 rounded-full border border-border bg-background/70 px-3 py-1 font-mono text-xs sm:text-[11px] uppercase tracking-[0.14em] text-faint backdrop-blur">
                 Portrait → /public
               </span>
             </div>

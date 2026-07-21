@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
 import type { Project } from "@/lib/content";
 import { Pill } from "@/components/ui/pill";
@@ -102,14 +103,17 @@ export function WorkCard({
   index,
   layout = "default",
   className,
+  href,
 }: {
   project: Project;
   index: string;
   layout?: "default" | "feature";
   className?: string;
+  /** Set when a published case study exists for this project. */
+  href?: string;
 }) {
-  if (layout === "feature") {
-    return (
+  const card =
+    layout === "feature" ? (
       <article
         className={cn(
           "group grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-12",
@@ -119,14 +123,20 @@ export function WorkCard({
         <Cover project={project} />
         <Meta project={project} index={index} />
       </article>
+    ) : (
+      <article className={cn("group", className)}>
+        <Cover project={project} />
+        <div className="mt-6">
+          <Meta project={project} index={index} />
+        </div>
+      </article>
     );
-  }
+
+  if (!href) return card;
+
   return (
-    <article className={cn("group", className)}>
-      <Cover project={project} />
-      <div className="mt-6">
-        <Meta project={project} index={index} />
-      </div>
-    </article>
+    <Link href={href} aria-label={`${project.name} — read the case study`}>
+      {card}
+    </Link>
   );
 }

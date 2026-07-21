@@ -23,14 +23,28 @@ export function Loader() {
       sessionStorage.getItem(SESSION_KEY);
     if (reduce || seen) {
       signalDone();
-      const raf = requestAnimationFrame(() => setVisible(false));
-      return () => cancelAnimationFrame(raf);
+      // A microtask always runs. Never gate dismissal on a frame callback:
+      // if rAF is throttled the overlay would cover the site permanently.
+      queueMicrotask(() => setVisible(false));
+      return;
     }
 
     document.documentElement.style.overflow = "hidden";
     let raf = 0;
+    let settle: ReturnType<typeof setTimeout> | undefined;
     const start = performance.now();
     const DURATION = 1250;
+
+    const finish = () => {
+      clearTimeout(failsafe);
+      try {
+        sessionStorage.setItem(SESSION_KEY, "1");
+      } catch {
+        /* storage can be unavailable in private modes — not fatal */
+      }
+      setVisible(false);
+      signalDone();
+    };
 
     const tick = (now: number) => {
       const t = Math.min((now - start) / DURATION, 1);
@@ -40,17 +54,19 @@ export function Loader() {
       if (t < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        sessionStorage.setItem(SESSION_KEY, "1");
-        setTimeout(() => {
-          setVisible(false);
-          signalDone();
-        }, 380);
+        settle = setTimeout(finish, 380);
       }
     };
     raf = requestAnimationFrame(tick);
 
+    /* Timers fire where animation frames may not (throttled or background
+       rendering). Without this the intro could cover the site forever. */
+    const failsafe = setTimeout(finish, DURATION + 1500);
+
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(settle);
+      clearTimeout(failsafe);
       document.documentElement.style.overflow = "";
     };
   }, [reduce]);
@@ -59,11 +75,16 @@ export function Loader() {
     if (!visible) document.documentElement.style.overflow = "";
   }, [visible]);
 
+  // Hard guarantee, decided at render rather than in a callback: with
+  // reduced motion the intro never covers the page.
+  if (reduce) return null;
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
           key="loader"
+          id="mq-loader"
           className="fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-background"
           initial={{ y: 0 }}
           exit={{ y: "-100%" }}

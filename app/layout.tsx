@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { Loader } from "@/components/loader";
@@ -11,10 +12,11 @@ const inter = Inter({
   display: "swap",
 });
 
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+/** Display face specified by the design tokens doc, self-hosted (FFL licensed). */
+const generalSans = localFont({
+  src: "../public/fonts/GeneralSans-Variable.woff2",
+  variable: "--font-general-sans",
+  weight: "200 700",
   display: "swap",
 });
 
@@ -95,13 +97,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sora.variable} ${jetbrains.variable} grain h-full antialiased`}
+      className={`${inter.variable} ${generalSans.variable} ${jetbrains.variable} grain h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
+        {/* Without JS neither the intro nor the scroll reveals can resolve
+            themselves, so content must be forced visible. */}
+        <noscript>
+          <style>{`#mq-loader{display:none !important}
+[style*="opacity:0"]{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
         <Loader />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
