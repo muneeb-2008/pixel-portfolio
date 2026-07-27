@@ -3,24 +3,18 @@ import { lensScenario, type LensState } from "@/content/projects";
 /**
  * The Clarity AI product surface, built in markup and CSS.
  *
- * One canvas that transforms between decision states — the generated answer
- * never changes, only how much of the system's reasoning is exposed.
+ * Refined for restraint: grouping is carried by spacing rather than rules,
+ * so the surface reads as a premium product instead of a wireframe. One
+ * quiet mark in the header, no row dividers, one filled control.
  *
- * `annotated` renders the same structure with the product decisions marked:
- * blue active regions and numbered markers. Because it is the *same*
- * component, the annotated copy aligns pixel-for-pixel with the plain one,
- * which is what lets the Decision Lens clip between them.
+ * `annotated` renders the same structure with the product decisions marked.
+ * Because it is the *same* component with a size-neutral highlight (padding
+ * offset by an equal negative margin), the annotated copy aligns
+ * pixel-for-pixel with the plain one — which is what lets the Decision Lens
+ * clip between them.
  */
 
 type Region = "answer" | "confidence" | "sources" | "controls";
-
-/** Marker numbers keep the annotation column and the canvas in sync. */
-const MARKER: Record<Region, string> = {
-  answer: "01",
-  confidence: "02",
-  sources: "03",
-  controls: "04",
-};
 
 function RegionBox({
   name,
@@ -39,29 +33,16 @@ function RegionBox({
         borderRadius: "var(--r-md)",
         background: annotated ? "var(--blue-field)" : "transparent",
         boxShadow: annotated ? "inset 0 0 0 1px var(--blue-line)" : "none",
-        padding: annotated ? "var(--s-3)" : "0",
-        margin: annotated ? "calc(var(--s-3) * -1)" : "0",
+        padding: annotated ? "var(--s-4)" : "0",
+        margin: annotated ? "calc(var(--s-4) * -1)" : "0",
       }}
     >
-      {annotated && (
-        <span
-          aria-hidden
-          className="absolute -top-2 right-2 inline-flex h-5 min-w-5 items-center justify-center px-1 font-mono text-[11px] font-medium"
-          style={{
-            background: "var(--blue-strong)",
-            color: "#fff",
-            borderRadius: "var(--r-sm)",
-          }}
-        >
-          {MARKER[name]}
-        </span>
-      )}
       {children}
     </div>
   );
 }
 
-/** Smoothly reveals a region without a layout jump. */
+/** Reveals a region without a layout jump. */
 function Reveal({ open, children }: { open: boolean; children: React.ReactNode }) {
   return (
     <div
@@ -85,7 +66,6 @@ export function ClarityCanvas({
 }) {
   const { shows } = state;
   const s = lensScenario;
-  const pad = compact ? "var(--s-4)" : "var(--s-6)";
 
   return (
     <div
@@ -93,41 +73,54 @@ export function ClarityCanvas({
       style={{
         borderRadius: "var(--r-lg)",
         border: "1px solid var(--line)",
-        boxShadow: "var(--lift-1)",
+        boxShadow: "var(--lift-2)",
       }}
     >
-      {/* Product chrome — a workspace strip, not a browser frame */}
+      {/* One quiet mark — no second label, no tinted strip */}
       <div
-        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b px-[var(--s-4)] py-[var(--s-3)] sm:px-[var(--s-6)]"
-        style={{ borderColor: "var(--line-soft)", background: "var(--surface)" }}
+        className="flex items-center justify-between px-[var(--s-8)] pt-[var(--s-6)]"
       >
-        <span className="label" style={{ color: "var(--ink)" }}>
+        <span
+          className="font-display"
+          style={{
+            fontSize: "var(--t-small)",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+          }}
+        >
           Clarity AI
         </span>
-        <span className="label">Research workspace · Demo</span>
+        <span className="label">Demo</span>
       </div>
 
-      <div style={{ padding: pad }}>
-        {/* Query */}
-        <p className="label">Query</p>
+      <div
+        style={{
+          padding: compact
+            ? "var(--s-6) var(--s-8) var(--s-8)"
+            : "var(--s-8)",
+        }}
+      >
+        {/* Query — no label, the quotation carries it */}
         <p
-          className="mt-[var(--s-2)]"
-          style={{ color: "var(--ink-2)", fontSize: "var(--t-small)" }}
+          style={{
+            color: "var(--ink-2)",
+            fontSize: "var(--t-small)",
+          }}
         >
           {s.query}
         </p>
 
-        {/* Generated answer — identical in every state */}
+        {/* The generated answer — the largest thing on the surface */}
         <div className="mt-[var(--s-6)]">
           <RegionBox name="answer" annotated={annotated}>
-            <p className="label">Generated answer</p>
             <p
-              className="mt-[var(--s-2)] font-display"
+              className="font-display"
               style={{
                 color: "var(--ink)",
-                fontSize: compact ? "var(--t-body)" : "var(--t-h3)",
-                lineHeight: 1.4,
-                letterSpacing: "-0.015em",
+                fontSize: compact ? "var(--t-lead)" : "var(--t-h3)",
+                fontWeight: 500,
+                lineHeight: 1.42,
+                letterSpacing: "-0.02em",
               }}
             >
               {s.answer}
@@ -137,20 +130,25 @@ export function ClarityCanvas({
 
         {/* Confidence */}
         <Reveal open={shows.confidence}>
-          <div className="mt-[var(--s-6)]">
+          <div className="mt-[var(--s-8)]">
             <RegionBox name="confidence" annotated={annotated}>
               <div className="flex items-baseline justify-between gap-4">
-                <span className="label">Model confidence</span>
+                <span className="label">Confidence</span>
                 <span
-                  className="font-mono font-medium"
-                  style={{ fontSize: "var(--t-label)", color: "var(--blue-ink)" }}
+                  className="font-display"
+                  style={{
+                    fontSize: "var(--t-lead)",
+                    fontWeight: 600,
+                    color: "var(--blue-ink)",
+                    letterSpacing: "-0.02em",
+                  }}
                 >
                   {s.confidence}%
                 </span>
               </div>
               <div
-                className="mt-[var(--s-2)] h-[6px] w-full overflow-hidden"
-                style={{ background: "var(--blue-field)", borderRadius: "var(--r-sm)" }}
+                className="mt-[var(--s-3)] h-[4px] w-full overflow-hidden"
+                style={{ background: "var(--blue-field)", borderRadius: "999px" }}
                 role="meter"
                 aria-valuenow={s.confidence}
                 aria-valuemin={0}
@@ -164,11 +162,11 @@ export function ClarityCanvas({
               </div>
               <Reveal open={shows.reasoning}>
                 <p
-                  className="mt-[var(--s-3)]"
+                  className="mt-[var(--s-4)]"
                   style={{ fontSize: "var(--t-small)", color: "var(--ink-2)" }}
                 >
                   <span style={{ color: "var(--ink)" }}>
-                    Low confidence is isolated to one claim:{" "}
+                    Isolated to one claim.{" "}
                   </span>
                   {s.reasoning}
                 </p>
@@ -177,45 +175,32 @@ export function ClarityCanvas({
           </div>
         </Reveal>
 
-        {/* Evidence */}
+        {/* Evidence — spacing groups the rows, no dividers */}
         <Reveal open={shows.sources}>
-          <div className="mt-[var(--s-6)]">
+          <div className="mt-[var(--s-8)]">
             <RegionBox name="sources" annotated={annotated}>
-              <p className="label">Evidence</p>
-              <ul className="mt-[var(--s-2)] flex flex-col">
+              <span className="label">Evidence</span>
+              <ul className="mt-[var(--s-4)] flex flex-col gap-[var(--s-3)]">
                 {s.sources.map((source) => (
                   <li
                     key={source.title}
-                    className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b py-[var(--s-2)] last:border-0"
-                    style={{ borderColor: "var(--line-soft)" }}
+                    className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"
                   >
                     <span style={{ fontSize: "var(--t-small)", color: "var(--ink)" }}>
                       {source.title}
                     </span>
-                    <span className="flex items-baseline gap-3">
-                      <span className="label">{source.meta}</span>
-                      <span
-                        className="px-2 py-[2px] font-mono uppercase"
-                        style={{
-                          fontSize: "11px",
-                          letterSpacing: "0.1em",
-                          borderRadius: "var(--r-sm)",
-                          background:
-                            source.strength === "Strong"
-                              ? "var(--blue-selected)"
-                              : "transparent",
-                          border:
-                            source.strength === "Strong"
-                              ? "none"
-                              : "1px solid var(--line)",
-                          color:
-                            source.strength === "Strong"
-                              ? "var(--blue-ink)"
-                              : "var(--ink-2)",
-                        }}
-                      >
-                        {source.strength}
-                      </span>
+                    <span
+                      className="font-mono"
+                      style={{
+                        fontSize: "var(--t-label)",
+                        letterSpacing: "0.06em",
+                        color:
+                          source.strength === "Strong"
+                            ? "var(--blue-ink)"
+                            : "var(--ink-2)",
+                      }}
+                    >
+                      {source.strength}
                     </span>
                   </li>
                 ))}
@@ -224,50 +209,41 @@ export function ClarityCanvas({
           </div>
         </Reveal>
 
-        {/* Human controls */}
+        {/* Human controls — one filled action, the rest quiet */}
         <Reveal open={shows.editing || shows.approval || shows.recovery}>
-          <div className="mt-[var(--s-6)]">
+          <div className="mt-[var(--s-8)]">
             <RegionBox name="controls" annotated={annotated}>
-              <div className="flex flex-wrap items-center gap-[var(--s-2)]">
-                {shows.editing && <DemoControl>Edit answer</DemoControl>}
+              <div className="flex flex-wrap items-center gap-x-[var(--s-6)] gap-y-[var(--s-3)]">
                 {shows.approval && (
-                  <DemoControl emphasis>Approve before sending</DemoControl>
+                  <span
+                    className="inline-flex items-center px-[var(--s-4)] py-[var(--s-2)]"
+                    style={{
+                      fontSize: "var(--t-small)",
+                      borderRadius: "var(--r-sm)",
+                      background: "var(--blue-strong)",
+                      color: "#fff",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Approve
+                  </span>
                 )}
-                {shows.recovery && <DemoControl>Undo</DemoControl>}
+                {shows.editing && (
+                  <span style={{ fontSize: "var(--t-small)", color: "var(--ink-2)" }}>
+                    Edit answer
+                  </span>
+                )}
+                {shows.recovery && (
+                  <span style={{ fontSize: "var(--t-small)", color: "var(--ink-2)" }}>
+                    Undo
+                  </span>
+                )}
               </div>
             </RegionBox>
           </div>
         </Reveal>
       </div>
     </div>
-  );
-}
-
-/**
- * Non-interactive demo affordance. A span, not a button — it illustrates an
- * interface decision and must not enter the tab order or be announced as an
- * operable control.
- */
-function DemoControl({
-  children,
-  emphasis = false,
-}: {
-  children: React.ReactNode;
-  emphasis?: boolean;
-}) {
-  return (
-    <span
-      className="inline-flex items-center px-[var(--s-3)] py-[var(--s-2)] font-mono"
-      style={{
-        fontSize: "var(--t-label)",
-        borderRadius: "var(--r-sm)",
-        border: emphasis ? "1px solid var(--blue-strong)" : "1px solid var(--line)",
-        color: emphasis ? "#fff" : "var(--ink-2)",
-        background: emphasis ? "var(--blue-strong)" : "transparent",
-      }}
-    >
-      {children}
-    </span>
   );
 }
 

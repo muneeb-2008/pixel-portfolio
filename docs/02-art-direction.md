@@ -16,21 +16,30 @@ row across the blue field.
 
 | Token | Value | Role |
 |---|---|---|
-| `--bg` | `#FFFFFF` | Main ground |
-| `--surface` | `#F4FAFE` | The featured-project environment |
-| `--blue` | `#87CEFA` | Brand signal — surfaces, rules, the contact field |
-| `--blue-strong` | `#4FAFE8` | Interaction — active edges, meters, controls |
-| `--blue-ink` | `#1668A3` | **Blue that carries text** |
-| `--ink` | `#101820` | Deep text, 18.3:1 on white |
-| `--ink-2` | `#62717B` | Secondary text, 5.1:1 on white |
-| `--line` | `rgba(16,24,32,.12)` | Structural borders |
-| `--blue-field` / `--blue-selected` | 16% / 32% | Soft surfaces, selected state |
+| `--bg` | `#FFFFFF` | Main ground — the site is white |
+| `--surface` | `#F8FBFD` | Barely-there secondary surface |
+| `--blue` | `#87CEFA` | Brand signal — grid lines, indicators |
+| `--blue-strong` | `#58B8EE` | Interaction — active edges, meters, controls |
+| `--blue-ink` | `#1668A3` | **The only blue that carries text** |
+| `--ink` | `#0F1720` | Deep text, 18.9:1 on white |
+| `--ink-2` | `#5F6B76` | Secondary text, 5.5:1 on white |
+| `--line` | `rgba(15,23,32,.10)` | Structural borders, used sparingly |
+| `--blue-grid` | `rgba(135,206,250,.16)` | Soft grid lines |
 
 **A contrast constraint shaped the system.** `#87CEFA` is only **1.7:1** on
-white and `#4FAFE8` is **2.5:1** — neither can legally carry text. So the brand
+white and `#58B8EE` is **2.2:1** — neither can legally carry text. So the brand
 blue is used exclusively as *surface, rule, meter and indicator*, and
 `--blue-ink` (5.9:1) is the only blue applied to type. That constraint is why
 the site reads as blue without ever being a "childish blue website".
+
+## Grid as a device, not wallpaper
+
+`.grid-panel` is a scoped zone with the radial fade baked in, so a grid can
+only appear where one is deliberately placed. It is used in exactly three
+places: **behind the hero interface** (right 62%), **the project environment**
+(right 64%), and **the contact scene** (lower 78%). The Decision Lens and
+About sections have no grid at all — the contrast between gridded and plain
+scenes is what stops it becoming a blueprint texture.
 
 Blue is never applied to a headline word. It marks interactive state, selection,
 interface feedback, navigation position, and connections between a label and

@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import { site } from "@/content/site";
 
 /**
- * The closing scene — a full-bleed blue field, not a footer.
+ * The closing scene — white, with controlled blue structure.
  *
- * The eight decision fragments arrive here aligned around the call to action,
- * and structural lines shift slightly under the pointer. All of that is
- * enhancement: the layout is complete and readable before any JS runs.
+ * Refinement pass: the flat #87CEFA field became a white scene with a grid
+ * panel and a single blue rule, which reads as more premium and keeps blue
+ * restrained. The eight decision labels still resolve here, but quietly.
+ *
+ * Pointer response is enhancement only — the layout is complete before JS.
  */
 export function Contact() {
   const { contact, fragments, availability } = site;
@@ -33,8 +35,8 @@ export function Contact() {
         const r = root.getBoundingClientRect();
         const dx = (e.clientX - r.left) / r.width - 0.5;
         const dy = (e.clientY - r.top) / r.height - 0.5;
-        root.style.setProperty("--shift-x", `${dx * 16}px`);
-        root.style.setProperty("--shift-y", `${dy * 10}px`);
+        root.style.setProperty("--shift-x", `${dx * 14}px`);
+        root.style.setProperty("--shift-y", `${dy * 8}px`);
       });
     };
 
@@ -51,105 +53,71 @@ export function Contact() {
       ref={rootRef}
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative overflow-hidden py-[var(--s-24)]"
+      className="relative overflow-hidden"
       style={{
-        background: "var(--blue)",
-        color: "var(--ink)",
+        paddingBlock: "var(--scene-y)",
         ["--shift-x" as string]: "0px",
         ["--shift-y" as string]: "0px",
       }}
     >
-      {/* Structural lines that drift under the pointer */}
+      {/* Grid device + one blue rule that drifts under the pointer */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="grid-panel pointer-events-none absolute inset-x-0 bottom-0 h-[78%]"
         style={{
           transform: "translate3d(var(--shift-x), var(--shift-y), 0)",
-          transition: "transform 400ms var(--ease-out)",
+          transition: "transform 500ms var(--ease-out)",
         }}
-      >
-        <span
-          className="absolute left-[12%] top-0 h-full w-px"
-          style={{ background: "rgba(16,24,32,0.16)" }}
-        />
-        <span
-          className="absolute left-[70%] top-0 h-full w-px"
-          style={{ background: "rgba(16,24,32,0.10)" }}
-        />
-        <span
-          className="absolute left-0 top-[28%] h-px w-full"
-          style={{ background: "rgba(16,24,32,0.10)" }}
-        />
-      </div>
+      />
 
       <div className="shell relative">
-        {/* Fragments, finally aligned */}
-        <ul
-          aria-hidden
-          className="grid grid-cols-2 gap-x-[var(--s-6)] gap-y-[var(--s-2)] sm:grid-cols-4 lg:grid-cols-8"
-          style={{
-            transform: "translate3d(calc(var(--shift-x) * -0.4), 0, 0)",
-            transition: "transform 400ms var(--ease-out)",
-          }}
-        >
-          {fragments.map((f) => (
-            <li
-              key={f}
-              className="font-mono uppercase"
-              style={{
-                fontSize: "var(--t-label)",
-                letterSpacing: "var(--tr-label)",
-                color: "rgba(16,24,32,0.78)",
-              }}
-            >
-              {f}
-            </li>
-          ))}
-        </ul>
+        <p className="label">Contact</p>
 
-        <h2
-          id="contact-heading"
-          className="t-display mt-[var(--s-12)] lg:w-[80%]"
-        >
+        <h2 id="contact-heading" className="t-display mt-[var(--s-8)] lg:w-[86%]">
           {contact.headline.map((line, i) => (
             <span
               key={line}
               className="block"
-              style={i === 1 ? { color: "rgba(16,24,32,0.66)" } : undefined}
+              style={i === 1 ? { color: "var(--ink-2)" } : undefined}
             >
               {line}
             </span>
           ))}
         </h2>
 
-        {/* Interactive contact line — an underline that grows, not a button */}
-        <div className="mt-[var(--s-12)] flex flex-wrap items-end justify-between gap-x-[var(--s-12)] gap-y-[var(--s-8)]">
+        {/* The contact line — an underline that answers the pointer */}
+        <div className="mt-[var(--s-24)]">
           <a
             href={`mailto:${contact.email}`}
-            className="group inline-flex max-w-full min-h-11 flex-wrap items-center gap-3 no-underline"
-            style={{ color: "var(--ink)", fontSize: "var(--t-h3)" }}
+            className="group inline-flex max-w-full items-baseline gap-4 no-underline"
+            style={{ color: "var(--ink)" }}
           >
-            <span className="relative" style={{ overflowWrap: "anywhere" }}>
+            <span
+              className="relative font-display"
+              style={{
+                fontSize: "var(--t-h2)",
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
+                overflowWrap: "anywhere",
+              }}
+            >
               {contact.email}
               <span
                 aria-hidden
-                className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-100 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-x-0"
-                style={{ background: "rgba(16,24,32,0.3)" }}
+                className="absolute -bottom-2 left-0 h-[2px] w-full origin-left transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)]"
+                style={{ background: "var(--line)" }}
               />
               <span
                 aria-hidden
-                className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-x-100"
-                style={{ background: "var(--ink)" }}
+                className="absolute -bottom-2 left-0 h-[2px] w-full origin-left scale-x-0 transition-transform duration-[var(--dur-slow)] ease-[var(--ease-out)] group-hover:scale-x-100"
+                style={{ background: "var(--blue-strong)" }}
               />
             </span>
-            <span
-              aria-hidden
-              className="transition-transform duration-[var(--dur)] ease-[var(--ease-out)] group-hover:translate-x-1"
-            >
-              →
-            </span>
           </a>
+        </div>
 
+        {/* Quiet resolution */}
+        <div className="mt-[var(--s-32)] flex flex-wrap items-baseline gap-x-[var(--s-16)] gap-y-[var(--s-4)]">
           <a
             href={contact.linkedin.href}
             target="_blank"
@@ -158,58 +126,55 @@ export function Contact() {
             style={{ color: "var(--ink)", fontSize: "var(--t-small)" }}
           >
             <span
-              className="border-b pb-[2px]"
-              style={{ borderColor: "rgba(16,24,32,0.4)" }}
+              className="border-b pb-[3px]"
+              style={{ borderColor: "var(--blue-strong)" }}
             >
               {contact.linkedin.label}
             </span>
-            <span aria-hidden>↗</span>
+            <span aria-hidden style={{ color: "var(--blue-ink)" }}>
+              ↗
+            </span>
           </a>
-        </div>
-
-        {/* Quiet resolution */}
-        <div
-          className="mt-[var(--s-24)] flex flex-wrap items-center justify-between gap-x-[var(--s-8)] gap-y-[var(--s-2)] pt-[var(--s-4)]"
-          style={{ borderTop: "1px solid rgba(16,24,32,0.18)" }}
-        >
-          <p
-            className="font-mono uppercase"
-            style={{
-              fontSize: "var(--t-label)",
-              letterSpacing: "var(--tr-label)",
-              color: "rgba(16,24,32,0.82)",
-            }}
-          >
+          <p style={{ color: "var(--ink-2)", fontSize: "var(--t-small)" }}>
             {contact.location}
           </p>
           {availability.visible && (
             <p
-              className="inline-flex items-center gap-2 font-mono uppercase"
-              style={{
-                fontSize: "var(--t-label)",
-                letterSpacing: "var(--tr-label)",
-                color: "rgba(16,24,32,0.82)",
-              }}
+              className="inline-flex items-center gap-2"
+              style={{ color: "var(--ink-2)", fontSize: "var(--t-small)" }}
             >
               <span
                 aria-hidden
                 className="h-[7px] w-[7px] rounded-full"
-                style={{ background: "var(--ink)" }}
+                style={{ background: "var(--blue-strong)" }}
               />
               {availability.label}
             </p>
           )}
-          <p
-            className="font-mono uppercase"
-            style={{
-              fontSize: "var(--t-label)",
-              letterSpacing: "var(--tr-label)",
-              color: "rgba(16,24,32,0.82)",
-            }}
-          >
-            {site.name} — {new Date().getFullYear()}
-          </p>
         </div>
+
+        {/* The eight decisions, finally aligned — the motif resolves */}
+        <ul
+          aria-hidden
+          className="mt-[var(--s-40)] grid grid-cols-2 gap-x-[var(--s-8)] gap-y-[var(--s-3)] sm:grid-cols-4 lg:grid-cols-8"
+          style={{
+            transform: "translate3d(calc(var(--shift-x) * -0.3), 0, 0)",
+            transition: "transform 500ms var(--ease-out)",
+          }}
+        >
+          {fragments.map((f) => (
+            <li key={f} className="label">
+              {f}
+            </li>
+          ))}
+        </ul>
+
+        <p
+          className="mt-[var(--s-16)]"
+          style={{ color: "var(--ink-2)", fontSize: "var(--t-label)" }}
+        >
+          {site.name} — {new Date().getFullYear()}
+        </p>
       </div>
     </section>
   );

@@ -9,10 +9,14 @@ import { ClarityCanvas, canvasDescription } from "@/components/demo/clarity-canv
 /**
  * Clarity AI — a cinematic light project scene.
  *
- * A pale blue environment holds one oversized white product surface that
- * crops past the right gutter. The surface is sticky (native `position:
- * sticky`, not a pinned scroll hijack) while the narrative beats pass it, and
- * it transforms from the bare answer to the designed one as they do.
+ * A near-white environment holds one oversized product surface that crops
+ * past the right gutter. The surface is sticky (native `position: sticky`,
+ * not a pinned scroll hijack) while the narrative passes it, transforming
+ * from the bare answer to the designed one.
+ *
+ * Refinement pass: dropped the "INTERFACE — DESIGNED" rule row, the
+ * per-beat annotation lines and the three-column metadata block. Grouping
+ * is spacing now, not rules.
  */
 export function FeaturedProject() {
   const p = featuredProject;
@@ -21,23 +25,12 @@ export function FeaturedProject() {
   const [step, setStep] = useState(2);
 
   const beats = [
-    {
-      k: "01",
-      label: "The problem",
-      body: p.challenge,
-      note: "The answer arrives with no way to check it.",
-    },
-    {
-      k: "02",
-      label: "The product decision",
-      body: p.decision,
-      note: "Confidence is attributed, then evidence is put within reach.",
-    },
+    { k: "01", label: "The problem", body: p.challenge },
+    { k: "02", label: "The product decision", body: p.decision },
     {
       k: "03",
       label: "Human control",
       body: "Editing, approval and an undo path are designed before the happy path — so a wrong answer is recoverable rather than shipped.",
-      note: "Nothing consequential happens without a person.",
     },
   ];
 
@@ -50,7 +43,6 @@ export function FeaturedProject() {
 
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      // The surface builds itself as the beats pass
       ScrollTrigger.create({
         trigger: rootRef.current,
         start: "top 62%",
@@ -61,10 +53,9 @@ export function FeaturedProject() {
         },
       });
 
-      // Background grid drifts — depth without parallax theatrics
       if (gridRef.current) {
         gsap.to(gridRef.current, {
-          yPercent: 6,
+          yPercent: 5,
           ease: "none",
           scrollTrigger: {
             trigger: rootRef.current,
@@ -86,82 +77,53 @@ export function FeaturedProject() {
       ref={rootRef}
       id="work"
       aria-labelledby="work-heading"
-      /* overflow-x-clip, never overflow-hidden: `hidden` makes this element a
-         scroll container and silently disables the sticky surface inside. */
+      /* overflow-x-clip, never overflow-hidden: `hidden` makes this a scroll
+         container and silently disables the sticky surface inside. */
       className="relative overflow-x-clip"
       style={{ background: "var(--surface)" }}
     >
+      {/* Grid confined to the interface side */}
       <div
         ref={gridRef}
         aria-hidden
-        className="blue-grid pointer-events-none absolute inset-0 -top-[6%] h-[112%]"
-        style={{ opacity: 0.6 }}
+        className="grid-panel pointer-events-none absolute right-0 top-0 hidden h-full w-[64%] lg:block"
       />
 
-      {/* Introduction */}
-      <div className="shell relative pt-[var(--s-24)]">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <p className="label">
-            <span style={{ color: "var(--blue-ink)" }}>01</span> — Selected work
-          </p>
-          <p className="label">Demo project</p>
-        </div>
-
-        <h2 id="work-heading" className="t-display mt-[var(--s-4)]">
+      {/* Introduction — one label, one title */}
+      <div className="shell relative" style={{ paddingTop: "var(--scene-y)" }}>
+        <p className="label">Selected work</p>
+        <h2 id="work-heading" className="t-display mt-[var(--s-6)]">
           {p.name}
         </h2>
-
-        <dl className="mt-[var(--s-8)] flex flex-wrap gap-x-[var(--s-16)] gap-y-[var(--s-4)]">
-          {[
-            { k: "Product type", v: p.productType },
-            { k: "Role", v: p.role },
-            { k: "Year", v: p.year },
-          ].map((m) => (
-            <div key={m.k}>
-              <dt className="label">{m.k}</dt>
-              <dd
-                className="mt-[var(--s-1)]"
-                style={{ fontSize: "var(--t-small)", color: "var(--ink)" }}
-              >
-                {m.v}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <p
+          className="measure-wide mt-[var(--s-8)]"
+          style={{ color: "var(--ink-2)", fontSize: "var(--t-lead)" }}
+        >
+          {p.productType} · {p.year} — {p.role}
+        </p>
       </div>
 
       {/* Narrative beside a sticky, transforming surface */}
-      <div className="shell relative mt-[var(--s-16)] pb-[var(--s-24)]">
-        {/* items-stretch (not start) so the surface column spans the full row
-            height — otherwise the sticky element has almost no range and the
-            interface scrolls away, leaving the beats stranded. */}
-        <div className="grid-editorial items-stretch gap-y-[var(--s-12)]">
-          {/* Beats — tall enough to give the sticky surface something to hold against */}
+      <div
+        className="shell relative"
+        style={{ marginTop: "var(--s-32)", paddingBottom: "var(--scene-y)" }}
+      >
+        <div className="grid-editorial items-stretch gap-y-[var(--s-16)]">
+          {/* Beats — the column must outlast the surface or it unpins */}
           <div className="col-span-full lg:col-span-4">
-            {/* Gap + trailing padding set the sticky surface's travel: the
-                column must outlast the surface or it unpins mid-story. */}
-            <ol className="flex flex-col gap-[var(--s-24)] lg:gap-[40vh] lg:pb-[26vh]">
+            <ol className="flex flex-col gap-[var(--s-32)] lg:gap-[40vh] lg:pb-[26vh]">
               {beats.map((b) => (
                 <li key={b.k}>
-                  <p className="label">
-                    <span style={{ color: "var(--blue-ink)" }}>{b.k}</span> —{" "}
-                    {b.label}
-                  </p>
+                  <p className="label">{b.label}</p>
                   <p
-                    className="measure mt-[var(--s-3)]"
-                    style={{ color: "var(--ink)", fontSize: "var(--t-lead)", lineHeight: 1.45 }}
-                  >
-                    {b.body}
-                  </p>
-                  <p
-                    className="measure mt-[var(--s-3)] pl-[var(--s-3)]"
+                    className="measure mt-[var(--s-4)]"
                     style={{
-                      borderLeft: "2px solid var(--blue)",
-                      color: "var(--ink-2)",
-                      fontSize: "var(--t-small)",
+                      color: "var(--ink)",
+                      fontSize: "var(--t-lead)",
+                      lineHeight: 1.45,
                     }}
                   >
-                    {b.note}
+                    {b.body}
                   </p>
                 </li>
               ))}
@@ -171,52 +133,30 @@ export function FeaturedProject() {
           {/* Oversized surface, cropping past the right gutter */}
           <div className="col-span-full lg:col-span-8 lg:col-start-5 lg:self-stretch">
             <div className="lg:sticky lg:top-[12vh]">
-              <div className="mb-[var(--s-3)] flex items-center gap-[var(--s-3)]">
-                <span className="label">Interface</span>
-                <span
-                  aria-hidden
-                  className="h-px flex-1"
-                  style={{ background: "var(--blue-line)" }}
-                />
-                <span className="label" style={{ color: "var(--blue-ink)" }}>
-                  {["Bare answer", "Uncertainty shown", "Designed"][step]}
-                </span>
-              </div>
-
-              <div style={{ marginRight: "calc(var(--gutter) * -1.4)" }}>
+              <div style={{ marginRight: "calc(var(--gutter) * -1.3)" }}>
                 <ClarityCanvas state={state} />
                 <p className="sr-only">{canvasDescription(state)}</p>
               </div>
+              <p className="label mt-[var(--s-4)]">
+                {["Bare answer", "Uncertainty shown", "Designed"][step]}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Demo outcome — explicitly labelled, never a fabricated metric */}
-        <div
-          className="mt-[var(--s-24)] grid-editorial items-start gap-y-[var(--s-4)] pt-[var(--s-8)]"
-          style={{ borderTop: "1px solid var(--line)" }}
-        >
-          <p className="label col-span-full lg:col-span-3" style={{ color: "var(--blue-ink)" }}>
+        <div className="mt-[var(--s-40)] lg:w-[72%]">
+          <p className="label" style={{ color: "var(--blue-ink)" }}>
             Demo outcome
           </p>
-          <p
-            className="col-span-full lg:col-span-8"
-            style={{
-              fontSize: "var(--t-h2)",
-              lineHeight: 1.2,
-              letterSpacing: "-0.03em",
-              fontFamily: "var(--font-display)",
-            }}
-          >
-            {p.outcome}
-          </p>
+          <p className="t-h2 mt-[var(--s-6)]">{p.outcome}</p>
           <a
             href={p.href}
-            className="group col-span-full mt-[var(--s-2)] inline-flex min-h-11 items-center gap-2 no-underline lg:col-span-8"
-            style={{ color: "var(--ink)" }}
+            className="group mt-[var(--s-8)] inline-flex min-h-11 items-center gap-2 no-underline"
+            style={{ color: "var(--ink)", fontSize: "var(--t-lead)" }}
           >
             <span
-              className="border-b-2 pb-[3px]"
+              className="border-b-2 pb-[4px]"
               style={{ borderColor: "var(--blue-strong)" }}
             >
               {p.hrefLabel}
