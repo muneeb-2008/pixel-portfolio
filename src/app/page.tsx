@@ -1,21 +1,19 @@
-import { Nav } from "@/components/nav";
-import { Hero } from "@/components/hero";
-import { FeaturedProject } from "@/components/featured-project";
-import { DecisionLens } from "@/components/decision-lens";
-import { AboutBand } from "@/components/about";
-import { Contact } from "@/components/contact";
+import { Hero } from "@/components/sections/hero";
+import { Intro } from "@/components/sections/intro";
+import { Projects } from "@/components/sections/projects";
+import { Playground } from "@/components/sections/playground";
+import { CTA } from "@/components/sections/cta";
+import { Footer } from "@/components/sections/footer";
 
 export default function Home() {
   return (
     <>
-      <Nav />
-      <main id="main">
-        <Hero />
-        <FeaturedProject />
-        <DecisionLens />
-        <AboutBand />
-        <Contact />
-      </main>
+      <Hero />
+      <Intro />
+      <Projects />
+      <Playground />
+      <CTA />
+      <Footer />
     </>
   );
 }

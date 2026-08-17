@@ -1,97 +1,117 @@
 /**
  * Site-level content.
  *
- * Items marked DEMO / TODO are placeholders for the concept and must be
- * replaced before launch. See docs/03-content-todo.md.
+ * PLACEHOLDER identity — every field marked TODO must be replaced before
+ * launch. No real person is represented here.
  */
 
 export const site = {
-  name: "Muneeb Qureshi",
-  role: "AI Product Designer",
-  url: "https://muneebqureshi.design", // TODO: confirm final domain
+  // TODO: replace with the real name / studio.
+  name: "Studio Atlas",
+  owner: "Maya Sol", // TODO
+  role: "Design & Interaction Studio",
+  location: "Lisbon, PT", // TODO
+  timezone: "Europe/Lisbon", // for the live clock in the nav
+  email: "hello@studioatlas.dev", // TODO
+  url: "https://studioatlas.dev", // TODO
   metaDescription:
-    "Muneeb Qureshi is an AI Product Designer. I design how people understand, control, and trust intelligent products — strategy, UX, interaction systems, and prototypes.",
+    "Studio Atlas is a placeholder design & interaction studio — brand, product, and web design shown through demo case studies.",
 
-  positioning:
-    "I design how people understand, control, and trust intelligent products.",
-
-  /* DEMO: availability is placeholder copy. Update or remove before launch. */
   availability: {
     isDemo: true,
-    label: "Available — 2026",
-    visible: true,
+    label: "Available for projects — 2026",
   },
 
   nav: [
-    { label: "Work", href: "#work" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
+    { label: "Work", href: "/#work" },
+    { label: "Playground", href: "/#playground" },
+    { label: "Info", href: "/#info" },
+    { label: "Contact", href: "/#contact" },
   ],
 
   hero: {
-    /* Authored breaks; they re-wrap responsively rather than being forced. */
-    headline: ["I design how people", "understand and control", "intelligent products."],
-    /* Sits beside the role label. Deliberately does NOT restate the headline —
-       the previous build repeated its opening words a few lines above it. */
-    context: "For AI startups, SaaS founders, and product teams.",
-    support:
-      "AI product strategy, UX, interaction systems, and prototypes designed around clarity, trust, and human judgment.",
-    primaryAction: { label: "View selected work", href: "#work" },
-    secondaryAction: { label: "Start a conversation", href: "#contact" },
+    // Rendered as masked lines; the breaks are the composition.
+    lines: ["Design that", "moves with", "intent."],
+    intro:
+      "An independent studio crafting brands, products, and interfaces with a focus on motion, clarity, and detail.",
+    scrollCue: "Selected work",
   },
 
-  /**
-   * The recurring motif — the eight product decisions the Decision Lens
-   * exposes. Scattered in the hero, aligned by the contact scene.
-   */
-  fragments: [
-    "USER INTENT",
-    "CONFIDENCE",
-    "CONTROL",
-    "CONTEXT",
-    "APPROVAL",
-    "RECOVERY",
-    "FEEDBACK",
-    "PRIVACY",
-  ],
-
-  about: {
-    label: "About",
-    statement:
-      "I design the point where intelligent systems meet human judgment.",
-    supporting: [
+  intro: {
+    label: "Info",
+    statement: "So — what do you actually do?",
+    lead: "Depends who's asking.",
+    // Interactive: pick a role, get the honest answer.
+    roles: [
       {
-        title: "AI product strategy",
-        body: "Deciding what the system should attempt, what it should refuse, and where a person has to stay in the loop.",
+        role: "A founder",
+        answer:
+          "A brand and a product that punch well above your stage — clear enough to raise on, sharp enough to launch with.",
       },
       {
-        title: "Product interaction",
-        body: "The mechanics of reviewing, correcting, and approving generated work without it becoming a second job.",
+        role: "A product manager",
+        answer:
+          "Interfaces your users understand without a manual, and a design partner who argues about the right things at the right time.",
       },
       {
-        title: "Trust",
-        body: "Confidence that is attributed to a specific claim rather than smeared across an answer.",
+        role: "An engineer",
+        answer:
+          "Design that's built to ship, not to admire — real states, real components, handed over the way you'd actually build it.",
       },
       {
-        title: "User control",
-        body: "Editing, approval, and recovery designed before the happy path, not bolted on after launch.",
+        role: "A designer",
+        answer:
+          "Someone who sweats the 4px, names the tokens, and cares about the stuff nobody notices until it's missing.",
       },
       {
-        title: "Working with teams",
-        body: "Embedded with founders, PMs, and engineers — shipping the decisions, not just the screens.",
+        role: "Everyone else",
+        answer:
+          "We make digital things — websites, apps, brands — feel considered, quick, and a little bit alive.",
       },
+    ],
+    services: [
+      "Brand & Identity",
+      "Product Design",
+      "Web & Interaction",
+      "Design Systems",
+      "Motion",
+      "Front-end",
     ],
   },
 
-  contact: {
-    headline: ["Building an intelligent product?", "Let's design how people experience it."],
-    email: "muneebqureshi411@gmail.com", // TODO: confirm the address to publish
-    linkedin: {
-      label: "LinkedIn",
-      /* TODO: replace with the real profile URL. */
-      href: "https://www.linkedin.com/",
-      isPlaceholder: true,
-    },
-    location: "Karachi, Pakistan",
+  playground: {
+    label: "Playground",
+    title: "Experiments, off-hours, and things we couldn't not make.",
+    // Small looser tiles — CSS-composed, no stock images.
+    items: [
+      { title: "Elastic type", tag: "Motion", hue: 18 },
+      { title: "Grid rituals", tag: "WebGL-free", hue: 210 },
+      { title: "Cursor studies", tag: "Interaction", hue: 285 },
+      { title: "Sound shapes", tag: "Audio", hue: 150 },
+      { title: "Paper folds", tag: "3D CSS", hue: 42 },
+      { title: "Slow scroll", tag: "Scroll", hue: 330 },
+    ],
+    marquee: [
+      "Prototyping",
+      "Art direction",
+      "Micro-interactions",
+      "Type systems",
+      "Framer",
+      "WebGL-free motion",
+      "Design engineering",
+    ],
   },
+
+  cta: {
+    label: "Contact",
+    lines: ["Have something", "worth building?"],
+    body: "Tell us about it. We reply to every serious enquiry within two days.",
+  },
+
+  socials: [
+    { label: "Instagram", href: "https://instagram.com/", isPlaceholder: true },
+    { label: "LinkedIn", href: "https://www.linkedin.com/", isPlaceholder: true },
+    { label: "X / Twitter", href: "https://x.com/", isPlaceholder: true },
+    { label: "Are.na", href: "https://www.are.na/", isPlaceholder: true },
+  ],
 } as const;

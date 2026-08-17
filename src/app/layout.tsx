@@ -1,26 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { site } from "@/content/site";
+import { AppLoader } from "@/components/loader/app-loader";
+import { Nav } from "@/components/nav/nav";
+import { Cursor } from "@/components/ui/cursor";
+import { SmoothScroll } from "@/components/providers/smooth-scroll";
 
-/* Display: a distinctive grotesk with real character in the counters and
-   terminals. Carries headlines and the product-surface voice. */
-const grotesk = Space_Grotesk({
-  variable: "--font-grotesk",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
   display: "swap",
 });
 
-/* Body: a neutral, highly readable sans for everything the visitor reads. */
-const sans = Inter({
-  variable: "--font-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-/* Utility: restricted to product metadata, interface labels, annotations
-   and small system states. */
-const monoUtility = JetBrains_Mono({
+const mono = JetBrains_Mono({
   variable: "--font-mono-utility",
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -34,8 +33,6 @@ export const metadata: Metadata = {
     template: `%s — ${site.name}`,
   },
   description: site.metaDescription,
-  authors: [{ name: site.name }],
-  creator: site.name,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -65,13 +62,30 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${grotesk.variable} ${sans.variable} ${monoUtility.variable} h-full`}
+      className={`${bricolage.variable} ${inter.variable} ${mono.variable} h-full`}
     >
+      <head>
+        {/* Reveal wrappers start at opacity 0 for the scroll animation; if JS
+            never runs, force them visible so nothing is lost. */}
+        <noscript>
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                "[data-reveal]{opacity:1 !important;transform:none !important}",
+            }}
+          />
+        </noscript>
+      </head>
       <body className="min-h-full">
         <a className="skip-link" href="#main">
           Skip to content
         </a>
-        {children}
+        <AppLoader />
+        <Cursor />
+        <SmoothScroll>
+          <Nav />
+          <main id="main">{children}</main>
+        </SmoothScroll>
       </body>
     </html>
   );
