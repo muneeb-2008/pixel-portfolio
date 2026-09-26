@@ -7,6 +7,8 @@ import {
   MINI,
   spriteCanvas,
   WorldColors,
+  LAMPS,
+  buildBuildingObject,
   type WorldObject,
 } from "@/game/render";
 
@@ -39,10 +41,13 @@ export type EngineContent = {
   npcs: Npc[];
   /** projectId → two-line building sign */
   banners?: Record<string, [string, string]>;
+  /** projectId → cover image URL, painted (pixelated) onto the building billboard */
+  covers?: Record<string, string>;
 };
 
 const T = 16;
-const SPEED = 76; // world px / sec
+const SPEED = 96; // world px / sec (walk)
+const SPRINT = 1.75; // hold Shift / B to run
 const NPC_SPEED = 26;
 const ENTER_R = 11; // walk-in radius (px) around a door's front spot
 const REACH_R = 26; // Enter / A interaction radius
@@ -68,7 +73,7 @@ type Walker = Actor & {
   wait: number;
 };
 
-type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; size: number };
+type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; size: number; glow?: boolean };
 
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 
@@ -97,6 +102,7 @@ export class Game {
   private clouds: { x: number; y: number; w: number; h: number; v: number }[] = [];
 
   input: Record<InputKey, boolean> = { up: false, down: false, left: false, right: false };
+  private sprint = false;
   private player: Actor & { idleBreath: 0 | 1 } = {
     x: 0,
     y: 0,
@@ -121,6 +127,10 @@ export class Game {
   private near: Trigger | null = null;
   private ready = false;
   private reduceMotion = false;
+  /** 0 = day … 1 = full night (eased toward nightTarget) */
+  private night = 0;
+  private nightTarget = 0;
+  private lightMask: HTMLCanvasElement | null = null;
 
   constructor(canvas: HTMLCanvasElement, content: EngineContent, cb: EngineCallbacks) {
     this.canvas = canvas;
@@ -165,6 +175,7 @@ export class Game {
     report(0.55);
     await nextFrame();
     this.objects = buildObjects(this.world, this.content.banners);
+    this.loadBillboards();
     report(0.8);
     await nextFrame();
     // prewarm every sprite frame so the first steps never hitch
@@ -208,6 +219,28 @@ export class Game {
     if (!p) this.last = performance.now();
   }
 
+  /** Day / night. The world eases into the new lighting over ~1s. */
+  setNight(on: boolean, instant = false) {
+    this.nightTarget = on ? 1 : 0;
+    if (instant || this.reduceMotion) this.night = this.nightTarget;
+  }
+
+  /** Paint each project's cover (pixelated) onto its building's billboard once loaded. */
+  private loadBillboards() {
+    const covers = this.content.covers ?? {};
+    for (const b of this.world.buildings) {
+      const url = covers[b.projectId];
+      if (!url) continue;
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => {
+        const i = this.objects.findIndex((o) => o.key === b.id);
+        if (i >= 0) this.objects[i] = buildBuildingObject(b, this.content.banners?.[b.projectId] ?? ["PROJECT", ""], img);
+      };
+      img.src = url;
+    }
+  }
+
   /** New Game: player back to spawn, villagers home, effects cleared. */
   reset() {
     this.player.x = this.world.spawn.tx * T;
@@ -236,6 +269,12 @@ export class Game {
 
   clearInput() {
     this.input = { up: false, down: false, left: false, right: false };
+    this.sprint = false;
+  }
+
+  /** Shift / touch B: run. */
+  setSprint(on: boolean) {
+    this.sprint = on;
   }
 
   /** Enter / Space / A: use whatever is within reach, regardless of facing. */
@@ -309,6 +348,7 @@ export class Game {
     this.world.water.forEach((w) => fillRect(w));
     this.world.trees.forEach((t) => set(t.x, t.y));
     this.world.signs.forEach((s) => set(s.tx, s.ty));
+    LAMPS.forEach((l) => set(l.x, l.y));
     set(this.world.mailbox.tx, this.world.mailbox.ty);
 
     // triggers: the spot just in front of each door, centred on the drawn door
@@ -431,13 +471,13 @@ export class Game {
     return false;
   }
 
-  private animate(a: Actor, dt: number, moving: boolean) {
+  private animate(a: Actor, dt: number, moving: boolean, beat = 0.13) {
     a.moving = moving;
     if (moving) {
       // 4-beat walk: stride-left → contact → stride-right → contact
       a.animT += dt;
-      if (a.animT >= 0.13) {
-        a.animT -= 0.13;
+      if (a.animT >= beat) {
+        a.animT -= beat;
         a.walkPhase = (a.walkPhase + 1) % 4;
       }
       const WALK: AnimFrame[] = [1, 0, 3, 0];
@@ -467,7 +507,8 @@ export class Game {
       else p.dir = inx > 0 ? "right" : "left";
     }
 
-    const step = SPEED * dt;
+    const running = this.sprint && moving;
+    const step = SPEED * (running ? SPRINT : 1) * dt;
     const bx = p.x;
     const by = p.y;
     if (vx && vy) {
@@ -477,7 +518,7 @@ export class Game {
     else if (vy) this.moveAxis(p, 0, vy * step, step);
     const actuallyMoved = Math.abs(p.x - bx) + Math.abs(p.y - by) > 0.01;
 
-    this.animate(p, dt, moving);
+    this.animate(p, dt, moving, running ? 0.075 : 0.11);
     if (!moving) {
       p.animT += dt;
       if (p.animT >= 0.6) {
@@ -490,12 +531,12 @@ export class Game {
     // footsteps: dust puff + a soft tick
     if (actuallyMoved) {
       this.stepT += dt;
-      if (this.stepT > 0.26) {
+      if (this.stepT > (running ? 0.15 : 0.24)) {
         this.stepT = 0;
         this.cb.onStep?.();
         if (!this.reduceMotion) {
           const f = this.feet();
-          for (let i = 0; i < 3; i++)
+          for (let i = 0; i < (running ? 5 : 3); i++)
             this.particles.push({ x: f.x + (Math.random() - 0.5) * 6, y: f.y + 2, vx: (Math.random() - 0.5) * 10, vy: -6 - Math.random() * 8, life: 0, max: 0.45, color: "#e8d3a8", size: 1 + (i % 2) });
         }
       }
@@ -582,9 +623,32 @@ export class Game {
       pt.life += dt;
       pt.x += pt.vx * dt;
       pt.y += pt.vy * dt;
-      pt.vy += 30 * dt;
+      if (!pt.glow) pt.vy += 30 * dt;
     }
     this.particles = this.particles.filter((pt) => pt.life < pt.max);
+  }
+
+  private updateNight(dt: number) {
+    if (this.night !== this.nightTarget) {
+      const d = this.nightTarget - this.night;
+      this.night = Math.abs(d) < 0.01 ? this.nightTarget : this.night + Math.sign(d) * Math.min(Math.abs(d), dt * 1.2);
+    }
+    // fireflies drift around trees after dark
+    if (this.night > 0.6 && !this.reduceMotion && Math.random() < dt * 6) {
+      const t = this.world.trees[Math.floor(Math.random() * this.world.trees.length)];
+      if (t)
+        this.particles.push({
+          x: t.x * T + Math.random() * 24 - 4,
+          y: t.y * T - Math.random() * 18,
+          vx: (Math.random() - 0.5) * 8,
+          vy: -3 - Math.random() * 4,
+          life: 0,
+          max: 2.2,
+          color: "#d8ff7a",
+          size: 1,
+          glow: true,
+        });
+    }
   }
 
   private updateClouds(dt: number) {
@@ -783,6 +847,8 @@ export class Game {
       }
     }
 
+    if (this.night > 0.001) this.renderNight(camX, camY, viewW, viewH);
+
     // bobbing marker above the door glow (last, so nothing hides it)
     if (door) {
       const bob = this.reduceMotion ? 0 : Math.round(Math.sin(this.time * 4) * 2) * s;
@@ -795,6 +861,88 @@ export class Game {
     }
 
     this.renderMinimap(camX, camY, viewW, viewH);
+  }
+
+  /**
+   * Night: a dark-blue multiply layer with holes punched out around light
+   * sources, then warm additive glows, lit window panes and fireflies on top.
+   */
+  private renderNight(camX: number, camY: number, viewW: number, viewH: number) {
+    const ctx = this.ctx;
+    const s = this.scale;
+    const n = this.night;
+    const W = this.canvas.width;
+    const H = this.canvas.height;
+    if (!this.lightMask) this.lightMask = document.createElement("canvas");
+    const mask = this.lightMask;
+    if (mask.width !== W || mask.height !== H) {
+      mask.width = W;
+      mask.height = H;
+    }
+    const m = mask.getContext("2d")!;
+    const sx = (wx: number) => (wx - camX) * s;
+    const sy = (wy: number) => (wy - camY) * s;
+
+    // gather lights in view
+    const flicker = this.reduceMotion ? 1 : 0.94 + 0.06 * Math.sin(this.time * 9);
+    const glows: { x: number; y: number; r: number }[] = [];
+    const panes: { x: number; y: number; w: number; h: number }[] = [];
+    for (const o of this.objects) {
+      if (!o.lights) continue;
+      if (o.x + o.w < camX - 60 || o.x > camX + viewW + 60 || o.y + o.h < camY - 60 || o.y > camY + viewH + 60) continue;
+      glows.push(...o.lights.glows);
+      panes.push(...o.lights.windows);
+    }
+    const f = this.feet();
+    glows.push({ x: f.x, y: f.y - 8, r: 34 }); // the player carries a little light
+
+    // 1) darkness with light holes
+    m.globalCompositeOperation = "source-over";
+    m.clearRect(0, 0, W, H);
+    m.fillStyle = `rgba(14, 18, 48, ${0.66 * n})`;
+    m.fillRect(0, 0, W, H);
+    m.globalCompositeOperation = "destination-out";
+    for (const g of glows) {
+      const r = g.r * s * flicker;
+      const grad = m.createRadialGradient(sx(g.x), sy(g.y), 0, sx(g.x), sy(g.y), r);
+      grad.addColorStop(0, "rgba(0,0,0,0.95)");
+      grad.addColorStop(0.55, "rgba(0,0,0,0.5)");
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      m.fillStyle = grad;
+      m.fillRect(sx(g.x) - r, sy(g.y) - r, r * 2, r * 2);
+    }
+    ctx.drawImage(mask, 0, 0);
+
+    // 2) warm additive glow
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (const g of glows) {
+      const r = g.r * 0.8 * s * flicker;
+      const grad = ctx.createRadialGradient(sx(g.x), sy(g.y), 0, sx(g.x), sy(g.y), r);
+      grad.addColorStop(0, `rgba(255, 180, 80, ${0.22 * n})`);
+      grad.addColorStop(1, "rgba(255, 180, 80, 0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(sx(g.x) - r, sy(g.y) - r, r * 2, r * 2);
+    }
+    ctx.restore();
+
+    // 3) lit window panes (cosy warm light behind the mullions)
+    ctx.globalAlpha = n;
+    for (const p of panes) {
+      ctx.fillStyle = "#ffcf6a";
+      ctx.fillRect(Math.round(sx(p.x)), Math.round(sy(p.y)), p.w * s, p.h * s);
+      ctx.fillStyle = "#fff0b8";
+      ctx.fillRect(Math.round(sx(p.x)), Math.round(sy(p.y)), Math.max(1, Math.floor(p.w / 3)) * s, s);
+    }
+    // 4) fireflies stay bright
+    for (const pt of this.particles) {
+      if (!pt.glow) continue;
+      const blink = 0.5 + 0.5 * Math.sin(this.time * 6 + pt.x);
+      ctx.globalAlpha = n * blink * (1 - pt.life / pt.max);
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(Math.round(sx(pt.x)), Math.round(sy(pt.y)), s, s);
+    }
+    ctx.globalAlpha = 1;
   }
 
   private renderMinimap(camX: number, camY: number, viewW: number, viewH: number) {
@@ -843,6 +991,7 @@ export class Game {
     }
     this.updateParticles(dt);
     this.updateClouds(dt);
+    this.updateNight(dt);
     this.render();
   };
 }

@@ -7,17 +7,17 @@ export function HelpPanel({ onClose }: { onClose: () => void }) {
   const touch = useInputModeValue() === "touch";
   const rows: [string, string][] = touch
     ? [
-        ["Move", "Hold the D-pad arrows."],
+        ["Move", "Hold the D-pad arrows. Hold B to run."],
         ["Enter / talk", "Walk up into a glowing door, or tap A (or the prompt) when you're next to a door or villager."],
         ["Dialogue", "Tap the box or Next. Skip jumps ahead."],
         ["Quests", "Tap your player card for the Quest Log — every project, achievement and gem."],
         ["Level up", "Earn XP for projects, hidden gems, villagers and stories."],
       ]
     : [
-        ["Move", "Arrow keys or WASD."],
+        ["Move", "Arrow keys or WASD. Hold Shift to run."],
         ["Enter / talk", "Walk up into a glowing door, or press Enter / Space next to a door or villager."],
         ["Dialogue", "Enter / Space / click for the next line. Esc skips."],
-        ["Shortcuts", "L Quest Log · C Character · M Mailbox · Esc Pause menu"],
+        ["Shortcuts", "L Quest Log · C Profile · M Mailbox · N Day/Night · Esc Pause"],
         ["Level up", "Earn XP for projects, hidden gems, villagers and stories."],
         ["Keyboard only?", "Tab reaches every button; the Quest Log opens any project without walking."],
       ];

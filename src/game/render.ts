@@ -229,34 +229,80 @@ export function drawWaterTile(ctx: CanvasRenderingContext2D, x: number, y: numbe
   ctx.fillRect(x + 8 * s - off * 0.1, y + 10 * s, 5 * s, 1 * s);
 }
 
-/** A tall tree — ~2× the player's height. The trunk sits in its tile; the canopy rises above. */
+/** Filled pixel circle, row by row. */
+function disc(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, c: string) {
+  for (let dy = -r; dy <= r; dy++) {
+    const half = Math.round(Math.sqrt(Math.max(0, r * r - dy * dy)) - 0.25);
+    px(ctx, cx - half, cy + dy, half * 2 + 1, 1, c);
+  }
+}
+
+/**
+ * Trees — ~2× the player's height, two species so the town doesn't look
+ * copy-pasted: a clustered round oak and a tiered pine (picked per tile).
+ * The trunk sits in its tile; the crown rises above.
+ */
 function tree(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
   const bx = gx * T;
   const by = gy * T;
-  px(ctx, bx + 2, by + 13, 12, 3, C.shadow);
+  const pine = hash(gx * 3, gy * 7) > 0.62;
+  // ground shadow
+  px(ctx, bx + 1, by + 13, 14, 3, C.shadow);
   px(ctx, bx + 3, by + 12, 10, 1, C.shadow);
-  // trunk with a root flare
-  px(ctx, bx + 6, by + 5, 4, 10, "#141019");
-  px(ctx, bx + 7, by + 5, 2, 10, C.trunk);
-  px(ctx, bx + 5, by + 14, 6, 1, "#141019");
-  px(ctx, bx + 6, by + 13, 1, 1, C.trunk);
-  px(ctx, bx + 9, by + 13, 1, 1, C.trunk);
-  // canopy: stepped round crown, outline → dark → mid → highlight
-  const rows: [number, number][] = [
-    [5, 6], [3, 10], [2, 12], [1, 14], [1, 14], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [1, 14], [1, 14], [2, 12], [3, 10], [5, 6],
+
+  if (pine) {
+    px(ctx, bx + 6, by + 6, 4, 9, "#1a1208");
+    px(ctx, bx + 7, by + 6, 2, 9, "#6a3f1e");
+    const tiers: [number, number, number][] = [
+      [by - 16, 3, 9], // [top y, top half-width, height]
+      [by - 9, 5, 9],
+      [by - 2, 7, 9],
+    ];
+    tiers.forEach(([ty, hw0, th]) => {
+      for (let i = 0; i < th; i++) {
+        const hw = Math.round(hw0 * (i / (th - 1)) + 1);
+        px(ctx, bx + 8 - hw - 1, ty + i, hw * 2 + 2, 1, "#17301b");
+        px(ctx, bx + 8 - hw, ty + i, hw * 2, 1, "#2f6b38");
+        px(ctx, bx + 8 - hw, ty + i, Math.max(1, Math.round(hw * 0.7)), 1, "#3f8a45");
+      }
+      px(ctx, bx + 8 - hw0 - 1, ty + th - 1, (hw0 + 1) * 2 + 1, 1, "#17301b");
+    });
+    px(ctx, bx + 7, by - 17, 2, 2, "#17301b");
+    px(ctx, bx + 6, by - 10, 1, 1, "#6fbf62");
+    px(ctx, bx + 5, by - 3, 1, 1, "#6fbf62");
+    px(ctx, bx + 4, by + 4, 1, 1, "#6fbf62");
+    return;
+  }
+
+  // oak trunk with bark + roots
+  px(ctx, bx + 5, by + 2, 6, 13, "#1a1208");
+  px(ctx, bx + 6, by + 2, 4, 13, C.trunk);
+  px(ctx, bx + 6, by + 2, 1, 13, "#96602f");
+  px(ctx, bx + 8, by + 6, 1, 3, "#5c3518");
+  px(ctx, bx + 4, by + 14, 8, 1, "#1a1208");
+  px(ctx, bx + 4, by + 13, 2, 1, C.trunk);
+  px(ctx, bx + 10, by + 13, 2, 1, C.trunk);
+  // crown: three overlapping clusters, outline → shade → mid → light
+  const clusters: [number, number, number][] = [
+    [bx + 4, by - 4, 6],
+    [bx + 12, by - 4, 6],
+    [bx + 8, by - 9, 7],
   ];
-  const top = by - 12;
-  rows.forEach(([o, w], i) => px(ctx, bx + o, top + i, w, 1, "#1f3d22"));
-  rows.forEach(([o, w], i) => {
-    if (w > 2) px(ctx, bx + o + 1, top + i + (i === 0 ? 1 : 0), w - 2, 1, C.treeDark);
-  });
-  rows.slice(1, -3).forEach(([o, w], i) => {
-    if (w > 4) px(ctx, bx + o + 1, top + i + 1, w - 4, 1, C.treeGreen);
-  });
-  px(ctx, bx + 4, top + 3, 5, 2, C.treeLite);
-  px(ctx, bx + 3, top + 5, 3, 2, C.treeLite);
-  px(ctx, bx + 10, top + 8, 2, 1, C.treeLite);
-  px(ctx, bx + 6, top + 10, 2, 1, C.treeLite);
+  clusters.forEach(([x, y, r]) => disc(ctx, x, y, r + 1, "#1f3d22"));
+  clusters.forEach(([x, y, r]) => disc(ctx, x, y, r, C.treeDark));
+  clusters.forEach(([x, y, r]) => disc(ctx, x - 1, y - 1, r - 2, C.treeGreen));
+  disc(ctx, bx + 6, by - 12, 2, C.treeLite);
+  disc(ctx, bx + 2, by - 6, 1, C.treeLite);
+  // dithered leaf texture + a couple of berries
+  for (let i = 0; i < 10; i++) {
+    const hx = bx + 1 + Math.floor(hash(gx + i, gy) * 14);
+    const hy = by - 14 + Math.floor(hash(gy + i, gx) * 14);
+    px(ctx, hx, hy, 1, 1, i % 2 ? "#7fcb6a" : "#2f6b30");
+  }
+  if (hash(gx, gy + 5) > 0.55) {
+    px(ctx, bx + 11, by - 6, 1, 1, "#e0533b");
+    px(ctx, bx + 4, by - 2, 1, 1, "#e0533b");
+  }
 }
 
 function flower(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
@@ -270,44 +316,133 @@ function flower(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
 }
 
 /* -------- building parts (shared across skins) -------- */
+export type LightRect = { x: number; y: number; w: number; h: number };
+
+/** Night lights an object emits: lit window panes + radial light sources (world px). */
+export type ObjectLights = { windows: LightRect[]; glows: { x: number; y: number; r: number }[] };
+
 function bShadow(ctx: CanvasRenderingContext2D, bx: number, by: number, w: number, h: number) {
-  ctx.fillStyle = C.shadow;
-  ctx.fillRect(bx + 2, by + h - 2, w - 2, 5);
+  px(ctx, bx + 3, by + h - 1, w - 2, 4, C.shadow);
+  px(ctx, bx + w - 2, by + 34, 3, h - 33, C.shadow);
 }
-function bWalls(ctx: CanvasRenderingContext2D, bx: number, by: number, w: number, h: number, top: number, tint = C.wall) {
+
+function bWalls(ctx: CanvasRenderingContext2D, bx: number, by: number, w: number, h: number, top: number, tint = C.wall, material: "plaster" | "brick" | "wood" = "plaster") {
+  const x0 = bx + 4;
+  const ww = w - 8;
   const wh = by + h - top;
-  px(ctx, bx + 2, top, w - 4, wh, tint);
-  px(ctx, bx + 2, top, 2, wh, C.wallShade);
-  px(ctx, bx + w - 4, top, 2, wh, C.wallDark);
-  px(ctx, bx + 2, by + h - 3, w - 4, 3, C.wallDark);
-  // clapboard siding on plaster walls; stone footing on every wall
-  if (tint === C.wall) for (let yy = top + 3; yy < by + h - 4; yy += 3) px(ctx, bx + 4, yy, w - 8, 1, C.wallShade);
-  for (let xx = bx + 3; xx < bx + w - 4; xx += 5) px(ctx, xx, by + h - 3, 1, 3, "#a88c5c");
+  px(ctx, x0 - 1, top, ww + 2, wh, "#3a2616"); // outline
+  px(ctx, x0, top, ww, wh - 1, tint);
+  px(ctx, x0, top, 2, wh - 1, C.wallShade); // left light edge
+  px(ctx, x0 + ww - 3, top, 3, wh - 1, C.wallDark); // right shade
+  if (material === "plaster") for (let yy = top + 4; yy < by + h - 5; yy += 3) px(ctx, x0 + 2, yy, ww - 5, 1, C.wallShade);
+  if (material === "brick")
+    for (let yy = top + 2, r = 0; yy < by + h - 4; yy += 3, r++) {
+      px(ctx, x0, yy, ww, 1, C.brickDark);
+      for (let xx = x0 + (r % 2 ? 2 : 5); xx < x0 + ww - 1; xx += 6) px(ctx, xx, yy - 2, 1, 2, C.brickDark);
+    }
+  if (material === "wood") for (let xx = x0 + 3; xx < x0 + ww - 2; xx += 4) px(ctx, xx, top + 1, 1, wh - 5, "#b08a55");
+  // stone footing
+  px(ctx, x0 - 1, by + h - 4, ww + 2, 3, "#8c7a64");
+  for (let xx = x0 + 1; xx < x0 + ww; xx += 5) px(ctx, xx, by + h - 4, 1, 3, "#6e5e4c");
+  px(ctx, x0 - 1, by + h - 4, ww + 2, 1, "#a8967e");
 }
+
 function bDoor(ctx: CanvasRenderingContext2D, bx: number, by: number, w: number, h: number, wide = false) {
-  const dw = wide ? 14 : 6;
-  const dh = wide ? 12 : 9;
+  const dw = wide ? 18 : 10;
+  const dh = wide ? 15 : 14;
   const dx = bx + Math.floor(w / 2) - Math.floor(dw / 2);
-  const dy = by + h - dh - 1;
+  const dy = by + h - dh - 3;
+  px(ctx, dx - 2, dy - 2, dw + 4, dh + 2, "#3a2616"); // frame outline
   px(ctx, dx - 1, dy - 1, dw + 2, dh + 1, C.woodDark);
   px(ctx, dx, dy, dw, dh, C.door);
   px(ctx, dx, dy, dw, 2, C.doorLite);
-  if (wide) for (let i = 1; i < 4; i++) px(ctx, dx, dy + i * 3, dw, 1, C.doorLite);
-  else px(ctx, dx + dw - 2, dy + 4, 1, 1, C.win); // knob
-}
-function bWindow(ctx: CanvasRenderingContext2D, x: number, y: number, w = 4, h = 4) {
-  px(ctx, x, y, w, h, C.winFrame);
-  px(ctx, x + 1, y + 1, w - 2, h - 2, C.win);
-}
-function roofRows(ctx: CanvasRenderingContext2D, bx: number, by: number, w: number, roofH: number, roof: string, roofDark: string, slope: number, eaves = true) {
-  for (let i = 0; i < roofH; i++) {
-    const inset = Math.floor((roofH - i) * slope);
-    px(ctx, bx + inset, by + i, w - inset * 2, 1, i < 2 ? roofDark : roof);
+  if (wide) {
+    for (let i = 1; i < 5; i++) px(ctx, dx, dy + i * 3, dw, 1, C.doorLite);
+  } else {
+    px(ctx, dx + 2, dy + 3, dw - 4, 4, "#5e3219"); // panel
+    px(ctx, dx + 2, dy + 8, dw - 4, 4, "#5e3219");
+    px(ctx, dx + dw - 3, dy + 7, 1, 2, C.win); // knob
   }
-  if (eaves) px(ctx, bx, by + roofH - 1, w, 2, roofDark);
+  px(ctx, dx - 3, by + h - 3, dw + 6, 2, "#9a8870"); // step
 }
 
-/** One building — `skin` selects the exterior, `style` tints the roof by district. */
+/** Framed window with mullions + sill; returns the glass rect for night lighting. */
+function bWindow(ctx: CanvasRenderingContext2D, x: number, y: number, w = 10, h = 8, shutters = false): LightRect {
+  px(ctx, x - 1, y - 1, w + 2, h + 2, "#3a2616");
+  px(ctx, x, y, w, h, "#9cc9ef");
+  px(ctx, x, y, w, 2, "#c8e3f7"); // sky reflection
+  px(ctx, x + 1, y + 2, 2, 2, "#e6f3fc");
+  px(ctx, x + Math.floor(w / 2), y, 1, h, C.winFrame);
+  px(ctx, x, y + Math.floor(h / 2), w, 1, C.winFrame);
+  px(ctx, x - 2, y + h + 1, w + 4, 2, C.woodDark); // sill
+  px(ctx, x - 2, y + h + 1, w + 4, 1, C.wood);
+  if (shutters) {
+    px(ctx, x - 4, y - 1, 3, h + 2, "#5f7f4a");
+    px(ctx, x + w + 1, y - 1, 3, h + 2, "#5f7f4a");
+    px(ctx, x - 4, y + 2, 3, 1, "#4a6639");
+    px(ctx, x + w + 1, y + 2, 3, 1, "#4a6639");
+  }
+  return { x, y, w, h };
+}
+
+/**
+ * Pokémon-style front-facing roof: rows widen toward the eave, brick-bond
+ * shingles, a light ridge cap, shaded side facets and a deep eave shadow.
+ */
+function bRoof(
+  ctx: CanvasRenderingContext2D,
+  bx: number,
+  top: number,
+  w: number,
+  roofH: number,
+  roof: string,
+  roofDark: string,
+  roofLite: string,
+  kind: "hip" | "gable" = "hip",
+) {
+  const inset0 = kind === "gable" ? Math.floor(w / 2) - 3 : 8;
+  for (let i = 0; i < roofH; i++) {
+    const t = i / (roofH - 1);
+    const inset = Math.round(inset0 * (1 - t));
+    const x = bx + inset;
+    const ww = w - inset * 2;
+    px(ctx, x - 1, top + i, ww + 2, 1, "#2a1a10"); // outline
+    px(ctx, x, top + i, ww, 1, roof);
+    // side facets: darker on the right, lighter on the left for volume
+    px(ctx, x, top + i, Math.max(2, Math.round(ww * 0.12)), 1, roofLite);
+    px(ctx, x + ww - Math.max(3, Math.round(ww * 0.18)), top + i, Math.max(3, Math.round(ww * 0.18)), 1, roofDark);
+    // shingle courses every 4 rows, staggered joints
+    if (i > 1 && i % 4 === 0) {
+      px(ctx, x, top + i, ww, 1, roofDark);
+      const off = (i / 4) % 2 ? 3 : 0;
+      for (let xx = x + off; xx < x + ww; xx += 6) px(ctx, xx, top + i + 1, 1, 3, roofDark);
+    }
+  }
+  // ridge cap
+  const rx = bx + inset0;
+  const rw = w - inset0 * 2;
+  px(ctx, rx - 1, top - 1, rw + 2, 2, "#2a1a10");
+  px(ctx, rx, top, rw, 1, roofLite);
+  // eave: overhang lip + deep shadow on the wall below
+  px(ctx, bx - 1, top + roofH - 1, w + 2, 2, "#2a1a10");
+  px(ctx, bx, top + roofH - 1, w, 1, roofDark);
+  px(ctx, bx + 4, top + roofH + 1, w - 8, 2, "rgba(40,20,10,0.35)");
+}
+
+function bChimney(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  px(ctx, x - 1, y - 1, 8, 12, "#2a1a10");
+  px(ctx, x, y, 6, 11, C.brick);
+  px(ctx, x, y + 3, 6, 1, C.brickDark);
+  px(ctx, x, y + 7, 6, 1, C.brickDark);
+  px(ctx, x - 1, y - 2, 8, 2, "#5a4a3c");
+}
+
+const ROOF_LITE: Record<string, string> = { design: "#e8876a", dev: "#4fb2b2", agency: "#e6c35e", hub: "#e0a86e" };
+
+/**
+ * One building — `skin` selects the exterior, `style` tints the roof by district.
+ * Returns the glass rects of its windows so the engine can light them at night.
+ */
 export function drawBuilding(
   ctx: CanvasRenderingContext2D,
   gx: number,
@@ -316,78 +451,87 @@ export function drawBuilding(
   hTiles: number,
   style: string,
   skin: BuildingSkin,
-) {
+): LightRect[] {
   const bx = gx * T;
   const by = gy * T;
   const w = wTiles * T;
   const h = hTiles * T;
   const cx = bx + Math.floor(w / 2);
   const [roof, roofDark] = ROOF[style] ?? ROOF.hub;
+  const roofLite = ROOF_LITE[style] ?? ROOF_LITE.hub;
+  const wins: LightRect[] = [];
   bShadow(ctx, bx, by, w, h);
 
+  // every house: walls from y+30, roof over the top ~half
+  const wallTop = by + 30;
+  const winY = wallTop + 6;
+
   if (skin === "studio") {
-    // sleek studio: thin flat parapet, big glass frontage, accent trim
-    const top = by + 6;
-    bWalls(ctx, bx, by, w, h, top, "#ece7d9");
-    px(ctx, bx + 1, by + 4, w - 2, 4, roofDark);
-    px(ctx, bx + 1, by + 4, w - 2, 1, roof);
-    px(ctx, bx + 2, by + 8, w - 4, 1, C.accent);
-    px(ctx, bx + 6, top + 4, w - 12, h - 22, C.glassDark);
-    px(ctx, bx + 7, top + 5, w - 14, h - 24, C.glass);
-    px(ctx, bx + 7, top + 5, 3, h - 24, C.accent3);
+    // modern studio: low hip roof with an accent fascia, wide glass frontage
+    bWalls(ctx, bx, by, w, h, wallTop, "#ece7d9");
+    bRoof(ctx, bx, by + 8, w, 24, roof, roofDark, roofLite, "hip");
+    px(ctx, bx + 2, by + 31, w - 4, 1, C.accent);
+    px(ctx, bx + 7, winY - 1, 16, 12, "#3a2616");
+    wins.push({ x: bx + 8, y: winY, w: 14, h: 10 });
+    px(ctx, bx + 8, winY, 14, 10, C.glass);
+    px(ctx, bx + 8, winY, 14, 2, "#c8e3f7");
+    px(ctx, bx + 12, winY, 1, 10, C.glassDark);
+    px(ctx, bx + 17, winY, 1, 10, C.glassDark);
+    wins.push(bWindow(ctx, bx + w - 20, winY, 10, 8));
     bDoor(ctx, bx, by, w, h);
   } else if (skin === "store") {
-    // boutique storefront: pitched roof, striped awning, display window
-    const roofH = 10;
-    roofRows(ctx, bx, by, w, roofH, roof, roofDark, 0.5);
-    const top = by + roofH;
-    bWalls(ctx, bx, by, w, h, top);
-    px(ctx, bx + 6, top + 6, w - 12, h - roofH - 12, C.glassDark);
-    px(ctx, bx + 7, top + 7, w - 14, h - roofH - 14, C.glass);
-    const ay = top + 4;
-    for (let i = 0; i < w - 8; i += 4) {
-      px(ctx, bx + 4 + i, ay, 2, 3, C.awning);
-      px(ctx, bx + 6 + i, ay, 2, 3, "#f4efe2");
+    // boutique: hip roof + chimney, striped awning over a display window
+    bWalls(ctx, bx, by, w, h, wallTop);
+    bChimney(ctx, bx + w - 18, by + 4);
+    bRoof(ctx, bx, by + 6, w, 26, roof, roofDark, roofLite, "hip");
+    wins.push(bWindow(ctx, bx + 9, winY + 3, 12, 9));
+    wins.push(bWindow(ctx, bx + w - 21, winY + 3, 12, 9));
+    const ay = winY - 2;
+    for (let i = 0; i < 16; i += 4) {
+      px(ctx, bx + 7 + i, ay, 2, 3, C.awning);
+      px(ctx, bx + 9 + i, ay, 2, 3, "#f4efe2");
+      px(ctx, bx + w - 23 + i, ay, 2, 3, C.awning);
+      px(ctx, bx + w - 21 + i, ay, 2, 3, "#f4efe2");
     }
-    px(ctx, bx + 4, ay + 3, w - 8, 1, C.woodDark);
     bDoor(ctx, bx, by, w, h);
   } else if (skin === "shop") {
-    // hardware shop: triangular gable, cross-frame window, hanging sign
-    const roofH = 14;
-    roofRows(ctx, bx, by, w, roofH, roof, roofDark, w / 2 / roofH, false);
-    const top = by + roofH - 2;
-    bWalls(ctx, bx, by, w, h, top);
-    bWindow(ctx, bx + 5, top + 4, 5, 5);
-    px(ctx, bx + 7, top + 4, 1, 5, C.winFrame);
-    px(ctx, bx + 5, top + 6, 5, 1, C.winFrame);
-    px(ctx, bx + w - 10, top + 3, 6, 1, C.woodDark); // bracket
-    px(ctx, bx + w - 6, top + 4, 4, 4, C.wood);
-    px(ctx, bx + w - 6, top + 4, 4, 1, C.woodDark);
+    // cottage shop: tall gable roof, shuttered windows, hanging sign
+    bWalls(ctx, bx, by, w, h, wallTop, C.wall, "wood");
+    bRoof(ctx, bx, by + 2, w, 30, roof, roofDark, roofLite, "gable");
+    wins.push(bWindow(ctx, bx + 10, winY + 1, 9, 8, true));
+    wins.push(bWindow(ctx, bx + w - 19, winY + 1, 9, 8, true));
+    px(ctx, cx - 3, by + 18, 7, 7, "#3a2616"); // attic window
+    px(ctx, cx - 2, by + 19, 5, 5, "#9cc9ef");
+    wins.push({ x: cx - 2, y: by + 19, w: 5, h: 5 });
+    px(ctx, bx + w - 12, wallTop + 3, 8, 1, C.woodDark); // sign bracket
+    px(ctx, bx + w - 9, wallTop + 4, 6, 5, C.wood);
+    px(ctx, bx + w - 9, wallTop + 4, 6, 1, C.woodDark);
     bDoor(ctx, bx, by, w, h);
   } else if (skin === "tower") {
-    // agency tower: steep peak, banner flag, stacked windows
-    const roofH = 16;
-    roofRows(ctx, bx, by, w, roofH, roof, roofDark, 0.7, false);
-    const top = by + roofH - 3;
-    bWalls(ctx, bx, by, w, h, top);
-    px(ctx, cx, by - 5, 1, 6, C.woodDark);
-    px(ctx, cx + 1, by - 5, 4, 3, C.accent);
-    bWindow(ctx, cx - 5, top + 4, 3, 4);
-    bWindow(ctx, cx + 2, top + 4, 3, 4);
-    bWindow(ctx, cx - 5, top + 11, 3, 4);
-    bWindow(ctx, cx + 2, top + 11, 3, 4);
+    // agency HQ: steep gable, flag on the peak, two floors of windows
+    bWalls(ctx, bx, by, w, h, wallTop - 4, "#f2e4c4");
+    bRoof(ctx, bx, by - 2, w, 30, roof, roofDark, roofLite, "gable");
+    px(ctx, cx, by - 10, 1, 9, C.woodDark);
+    px(ctx, cx + 1, by - 10, 6, 4, C.accent);
+    px(ctx, cx + 1, by - 7, 4, 1, "#a8392c");
+    wins.push(bWindow(ctx, bx + 9, wallTop, 8, 6));
+    wins.push(bWindow(ctx, bx + w - 17, wallTop, 8, 6));
+    wins.push(bWindow(ctx, bx + 9, wallTop + 12, 8, 6));
+    wins.push(bWindow(ctx, bx + w - 17, wallTop + 12, 8, 6));
     bDoor(ctx, bx, by, w, h);
   } else {
-    // workshop / maker: brick walls, pitched roof + skylight, garage door
-    const roofH = 11;
-    roofRows(ctx, bx, by, w, roofH, roof, roofDark, 0.5);
-    const top = by + roofH;
-    bWalls(ctx, bx, by, w, h, top, C.brick);
-    for (let yy = top + 3; yy < by + h - 3; yy += 4) px(ctx, bx + 2, yy, w - 4, 1, C.brickDark);
-    px(ctx, cx - 3, by + 3, 6, 3, C.glass);
-    px(ctx, cx - 3, by + 3, 6, 1, C.glassDark);
+    // maker workshop: brick walls, hip roof with skylight, garage door
+    bWalls(ctx, bx, by, w, h, wallTop, C.brick, "brick");
+    bChimney(ctx, bx + 10, by + 4);
+    bRoof(ctx, bx, by + 6, w, 26, roof, roofDark, roofLite, "hip");
+    px(ctx, cx - 5, by + 14, 10, 6, "#2a1a10"); // skylight
+    px(ctx, cx - 4, by + 15, 8, 4, C.glass);
+    wins.push({ x: cx - 4, y: by + 15, w: 8, h: 4 });
+    wins.push(bWindow(ctx, bx + 8, winY, 8, 7));
+    wins.push(bWindow(ctx, bx + w - 16, winY, 8, 7));
     bDoor(ctx, bx, by, w, h, true);
   }
+  return wins;
 }
 
 /* ------------------------------------------------------------------ *
@@ -404,6 +548,9 @@ export type WorldObject = {
   baseY: number; // world-px y of the footprint's bottom edge (sort key)
   canvas: HTMLCanvasElement;
   texts: WorldText[];
+  lights?: ObjectLights;
+  /** building id, so a billboard can be repainted once its image loads */
+  key?: string;
 };
 
 function makeObject(
@@ -424,41 +571,61 @@ function makeObject(
   return { x, y, w, h, baseY, canvas: cv, texts };
 }
 
-/** Sign plate mounted above a building: project name + a short descriptor. */
-function buildingLogo(ctx: CanvasRenderingContext2D, b: Building, lines: [string, string]): WorldText[] {
+const BILL_W = 46; // billboard art size (16:9-ish, in art px)
+const BILL_H = 26;
+
+/**
+ * Billboard above a building: a pixelated mockup of the project (so you can
+ * see what's inside before entering) with the project name underneath.
+ * Falls back to a two-line text plate when there's no image (yet).
+ */
+function billboard(ctx: CanvasRenderingContext2D, b: Building, lines: [string, string], img?: HTMLImageElement | null): WorldText[] {
   const cx = (b.tx + b.w / 2) * T;
-  const roofTop = b.ty * T;
-  const bw = 56;
-  const bh = 19;
-  const lx = Math.round(cx - bw / 2);
-  const ly = roofTop - bh - 2;
-  // mounting posts
-  px(ctx, cx - 8, roofTop - 3, 2, 4, C.woodDark);
-  px(ctx, cx + 6, roofTop - 3, 2, 4, C.woodDark);
-  // plate
-  px(ctx, lx, ly, bw, bh, C.banner);
-  px(ctx, lx, ly, bw, 1, C.bannerEdge);
-  // dashed accent border
+  const roofTop = b.ty * T + (b.skin === "tower" ? -12 : 0);
+  const fw = BILL_W + 4;
+  const fh = BILL_H + 12;
+  const lx = Math.round(cx - fw / 2);
+  const ly = roofTop - fh - 1;
+  // posts
+  px(ctx, cx - 14, ly + fh - 1, 2, 6, "#2a1a10");
+  px(ctx, cx + 12, ly + fh - 1, 2, 6, "#2a1a10");
+  // frame
+  px(ctx, lx - 1, ly - 1, fw + 2, fh + 2, "#1a120c");
+  px(ctx, lx, ly, fw, fh, C.banner);
+  px(ctx, lx, ly, fw, 1, C.bannerEdge);
+  px(ctx, lx, ly + fh - 1, fw, 1, C.bannerEdge);
+  if (img && img.complete && img.naturalWidth) {
+    // downsample → nearest-neighbour upscale later = a pixel-art mockup
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, lx + 2, ly + 2, BILL_W, BILL_H);
+    ctx.restore();
+    px(ctx, lx + 2, ly + 2, BILL_W, 1, "rgba(255,255,255,0.25)"); // glass sheen
+    return [{ text: lines[0], x: cx, y: ly + BILL_H + 7, size: 5, color: C.accent3 }];
+  }
+  // text-only plate
   ctx.save();
   ctx.strokeStyle = "#c8913a";
   ctx.lineWidth = 1;
   ctx.setLineDash([2, 2]);
-  ctx.strokeRect(lx + 1.5, ly + 1.5, bw - 3, bh - 3);
-  ctx.setLineDash([]);
+  ctx.strokeRect(lx + 2.5, ly + 2.5, fw - 5, fh - 5);
   ctx.restore();
   return [
-    { text: lines[0], x: cx, y: ly + 7, size: 6, color: C.accent3 },
-    { text: lines[1], x: cx, y: ly + 14, size: 4, color: "#cdb994" },
+    { text: lines[0], x: cx, y: ly + 14, size: 6, color: C.accent3 },
+    { text: lines[1], x: cx, y: ly + 24, size: 4, color: "#cdb994" },
   ];
 }
 
-export function drawInn(ctx: CanvasRenderingContext2D, gx: number, gy: number, wTiles: number, hTiles: number) {
-  drawBuilding(ctx, gx, gy, wTiles, hTiles, "hub", "shop");
+export function drawInn(ctx: CanvasRenderingContext2D, gx: number, gy: number, wTiles: number, hTiles: number): LightRect[] {
+  const wins = drawBuilding(ctx, gx, gy, wTiles, hTiles, "hub", "shop");
   const bx = gx * T;
   const by = gy * T;
   // hanging lantern by the door
-  px(ctx, bx + wTiles * T - 6, by + hTiles * T - 12, 1, 4, C.woodDark);
-  px(ctx, bx + wTiles * T - 7, by + hTiles * T - 8, 3, 3, C.win);
+  px(ctx, bx + wTiles * T - 12, by + hTiles * T - 17, 1, 4, C.woodDark);
+  px(ctx, bx + wTiles * T - 14, by + hTiles * T - 13, 5, 5, "#2a1a10");
+  px(ctx, bx + wTiles * T - 13, by + hTiles * T - 12, 3, 3, C.win);
+  return wins;
 }
 
 /** Arrow glyphs aren't in the pixel font — signs draw them as pixel art instead. */
@@ -506,26 +673,73 @@ function mailbox(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
   px(ctx, bx + 12, by + 4, 3, 2, C.flag); // flag
 }
 
-/** Buildings, inn, trees, signs and mailbox as depth-sortable objects. */
+/** Iron street lamp (2 tiles tall); its head glows at night. */
+function lamp(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
+  const bx = gx * T;
+  const by = gy * T;
+  px(ctx, bx + 4, by + 13, 8, 3, C.shadow);
+  px(ctx, bx + 5, by + 12, 6, 3, "#2a2a30"); // base
+  px(ctx, bx + 6, by + 11, 4, 1, "#3c3c46");
+  px(ctx, bx + 7, by - 8, 2, 20, "#2a2a30"); // pole
+  px(ctx, bx + 7, by - 8, 1, 20, "#4a4a56");
+  px(ctx, bx + 4, by - 15, 8, 2, "#2a2a30"); // cap
+  px(ctx, bx + 5, by - 13, 6, 6, "#2a2a30"); // housing
+  px(ctx, bx + 6, by - 12, 4, 4, "#ffe7a3"); // glass
+  px(ctx, bx + 6, by - 12, 1, 4, "#fff6d6");
+  px(ctx, bx + 5, by - 7, 6, 1, "#2a2a30");
+}
+
+/** Lamp positions (tile coords) — beside the roads, never on them. */
+export const LAMPS: { x: number; y: number }[] = [
+  { x: 9, y: 17 }, { x: 16, y: 21 }, { x: 28, y: 15 }, { x: 33, y: 21 }, { x: 38, y: 21 },
+  { x: 49, y: 17 }, { x: 24, y: 9 }, { x: 7, y: 23 }, { x: 43, y: 23 },
+];
+
+const LOGO_H = 44; // billboard headroom above a building
+
+/** One building object (repainted when its billboard image arrives). */
+export function buildBuildingObject(b: Building, banner: [string, string], img?: HTMLImageElement | null): WorldObject {
+  let wins: LightRect[] = [];
+  const o = makeObject(b.tx * T, b.ty * T - LOGO_H, b.w * T, b.h * T + LOGO_H + 4, (b.ty + b.h) * T, (ctx) => {
+    wins = drawBuilding(ctx, b.tx, b.ty, b.w, b.h, b.style, b.skin);
+    return billboard(ctx, b, banner, img);
+  });
+  const doorX = (b.tx + b.w / 2) * T;
+  o.lights = { windows: wins, glows: [{ x: doorX, y: (b.ty + b.h) * T - 6, r: 22 }, ...wins.map((r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2, r: 18 }))] };
+  o.key = b.id;
+  return o;
+}
+
+/** Buildings, inn, trees, signs, lamps and mailbox as depth-sortable objects. */
 export function buildObjects(world: WorldData, banners: Record<string, [string, string]> = {}): WorldObject[] {
   const objs: WorldObject[] = [];
-  const LOGO_H = 24; // banner + flag headroom above a building
 
-  world.buildings.forEach((b) =>
-    objs.push(
-      makeObject(b.tx * T, b.ty * T - LOGO_H, b.w * T, b.h * T + LOGO_H + 4, (b.ty + b.h) * T, (ctx) => {
-        drawBuilding(ctx, b.tx, b.ty, b.w, b.h, b.style, b.skin);
-        return buildingLogo(ctx, b, banners[b.projectId] ?? ["PROJECT", ""]);
-      }),
-    ),
-  );
+  world.buildings.forEach((b) => objs.push(buildBuildingObject(b, banners[b.projectId] ?? ["PROJECT", ""])));
 
   const a = world.about;
-  objs.push(makeObject(a.tx * T, a.ty * T - 8, a.w * T, a.h * T + 12, (a.ty + a.h) * T, (ctx) => drawInn(ctx, a.tx, a.ty, a.w, a.h)));
+  let innWins: LightRect[] = [];
+  const inn = makeObject(a.tx * T, a.ty * T - 8, a.w * T, a.h * T + 12, (a.ty + a.h) * T, (ctx) => {
+    innWins = drawInn(ctx, a.tx, a.ty, a.w, a.h);
+  });
+  inn.lights = {
+    windows: innWins,
+    glows: [
+      { x: (a.tx + a.w / 2) * T, y: (a.ty + a.h) * T - 6, r: 26 },
+      { x: (a.tx + a.w) * T - 11, y: (a.ty + a.h) * T - 11, r: 22 },
+      ...innWins.map((r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2, r: 18 })),
+    ],
+  };
+  objs.push(inn);
 
   world.trees.forEach((t) =>
-    objs.push(makeObject(t.x * T, t.y * T - 12, T, T + 12, (t.y + 1) * T, (ctx) => tree(ctx, t.x, t.y))),
+    objs.push(makeObject(t.x * T - 2, t.y * T - 16, T + 4, T + 16, (t.y + 1) * T, (ctx) => tree(ctx, t.x, t.y))),
   );
+
+  LAMPS.forEach((l) => {
+    const o = makeObject(l.x * T, l.y * T - 16, T, T + 16, (l.y + 1) * T, (ctx) => lamp(ctx, l.x, l.y));
+    o.lights = { windows: [{ x: l.x * T + 6, y: l.y * T - 12, w: 4, h: 4 }], glows: [{ x: l.x * T + 8, y: l.y * T - 6, r: 52 }] };
+    objs.push(o);
+  });
 
   world.signs.forEach((s) => {
     const arrow = s.sub ? (ARROWS[s.sub] ?? null) : null;

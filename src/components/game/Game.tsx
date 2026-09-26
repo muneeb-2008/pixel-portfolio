@@ -6,7 +6,6 @@ import { world } from "@/game/data/world";
 import { character } from "@/game/data/character";
 import { npcs } from "@/game/data/npcs";
 import { getProject, projects } from "@/game/data/projects";
-import { about } from "@/game/data/about";
 import { gems } from "@/game/data/collectibles";
 import { villagers } from "@/game/data/villagers";
 import {
@@ -22,6 +21,7 @@ import {
   type Save,
 } from "@/game/progress";
 import { initSound, play, setSound, unlockAudio } from "@/game/audio";
+import { asset } from "@/lib/asset";
 import type { HatKind, Palette } from "@/game/types";
 import { BootScreen } from "./BootScreen";
 import { TitleScreen } from "./TitleScreen";
@@ -32,6 +32,7 @@ import { ContactForm, type LetterDraft } from "./ContactForm";
 import { HelpPanel } from "./HelpPanel";
 import { QuestLog } from "./QuestLog";
 import { PauseMenu } from "./PauseMenu";
+import { HouseInterior } from "./HouseInterior";
 import { Hud, Iris, LevelBanner, NearPrompt, ToastView, type ToastMsg } from "./Hud";
 import { TouchControls } from "./TouchControls";
 import { InputModeContext, useInputModeTracker } from "./inputMode";
@@ -57,6 +58,7 @@ type Overlay =
       | { type: "help" }
       | { type: "log"; focus?: string }
       | { type: "pause" }
+      | { type: "house" }
     ) & { back?: Overlay });
 
 /** Each district's building intros are narrated by that district's villager. */
@@ -77,6 +79,8 @@ const zoneName = (projectId: string) => {
   const p = getProject(projectId);
   return world.zones.find((z) => z.kind === p?.zone)?.name ?? "Project";
 };
+
+const NIGHT_KEY = "pixel-portfolio:night";
 
 const reducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -100,6 +104,17 @@ export default function Game() {
   const [iris, setIris] = useState<{ x: number; y: number; action: () => void } | null>(null);
   const irisRef = useRef(false);
   const [sound, setSoundState] = useState(initSound);
+  const [night, setNightState] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem(NIGHT_KEY);
+      if (saved) return saved === "on";
+    } catch {
+      /* ignore */
+    }
+    const h = new Date().getHours();
+    return h >= 19 || h < 6;
+  });
+  const nightRef = useRef(night);
 
   const xp = xpOf(save);
   const lvl = levelOf(xp);
@@ -147,13 +162,16 @@ export default function Game() {
   }, []);
 
   const openAbout = useCallback(() => {
-    setSave((s) => (s.about ? s : { ...s, about: true }));
-    setOverlay({ type: "dialogue", speaker: about.speaker, role: about.place, lines: about.lines, portrait: { palette: character.palette, hat: "none" } });
+    setOverlay({ type: "house" });
   }, []);
 
-  const openContact = useCallback(() => {
+  const readAbout = useCallback(() => {
+    setSave((s) => (s.about ? s : { ...s, about: true }));
+  }, []);
+
+  const openContact = useCallback((back?: Overlay) => {
     setSave((s) => (s.mail ? s : { ...s, mail: true }));
-    setOverlay({ type: "contact" });
+    setOverlay({ type: "contact", back: back ?? undefined });
   }, []);
 
   /** Open a project from the Quest Log — closing it returns to the list, row focused. */
@@ -248,7 +266,15 @@ export default function Game() {
     if (!canvas) return;
     const engine = new Engine(
       canvas,
-      { world, character, gems, villagers, npcs, banners: Object.fromEntries(projects.map((p) => [p.id, p.banner])) },
+      {
+        world,
+        character,
+        gems,
+        villagers,
+        npcs,
+        banners: Object.fromEntries(projects.map((p) => [p.id, p.banner])),
+        covers: Object.fromEntries(projects.filter((p) => p.gallery[0]).map((p) => [p.id, asset(p.gallery[0])])),
+      },
       {
         onTrigger: (t) => handlersRef.current.trigger(t),
         onNear: setNear,
@@ -259,6 +285,7 @@ export default function Game() {
     );
     engine.setProgress(saveRef.current);
     engine.setAttract(true);
+    engine.setNight(nightRef.current, true);
     engineRef.current = engine;
     void engine.start();
     const onResize = () => engine.resize();
@@ -316,11 +343,32 @@ export default function Game() {
     setPhase("title");
   }, []);
 
+  useEffect(() => {
+    nightRef.current = night;
+    engineRef.current?.setNight(night);
+  }, [night]);
+
+  const toggleNight = useCallback(() => {
+    const next = !night;
+    setNightState(next);
+    play(next ? "open" : "select");
+    try {
+      window.localStorage.setItem(NIGHT_KEY, next ? "on" : "off");
+    } catch {
+      /* ignore */
+    }
+  }, [night]);
+
   const toggleSound = useCallback(() => {
     const next = !sound;
     setSound(next);
     setSoundState(next);
   }, [sound]);
+
+  const toggleNightRef = useRef(toggleNight);
+  useEffect(() => {
+    toggleNightRef.current = toggleNight;
+  }, [toggleNight]);
 
   /* ---------------- keyboard (world only — panels own their keys) ---------------- */
   useEffect(() => {
@@ -329,6 +377,10 @@ export default function Game() {
       const target = e.target as HTMLElement | null;
       if (target?.closest?.("input, textarea")) return;
       const k = e.key.toLowerCase();
+      if (k === "shift") {
+        engineRef.current?.setSprint(true);
+        return;
+      }
       const dir = KEY_MAP[k];
       if (dir) {
         e.preventDefault();
@@ -345,9 +397,10 @@ export default function Game() {
       const shortcut: Record<string, () => void> = {
         c: () => setOverlay({ type: "sheet" }),
         l: () => setOverlay({ type: "log" }),
-        m: openContact,
+        m: () => openContact(),
         h: () => setOverlay({ type: "help" }),
         escape: () => setOverlay({ type: "pause" }),
+        n: () => toggleNightRef.current(),
       };
       if (shortcut[k]) {
         e.preventDefault();
@@ -356,6 +409,7 @@ export default function Game() {
       }
     };
     const up = (e: KeyboardEvent) => {
+      if (e.key === "Shift") engineRef.current?.setSprint(false);
       const dir = KEY_MAP[e.key.toLowerCase()];
       if (dir) engineRef.current?.setInput(dir, false);
     };
@@ -417,11 +471,13 @@ export default function Game() {
                 gemTotal={gems.length}
                 onLog={() => setOverlay({ type: "log" })}
                 onSheet={() => setOverlay({ type: "sheet" })}
-                onContact={openContact}
+                onContact={() => openContact()}
                 onMenu={() => setOverlay({ type: "pause" })}
+                night={night}
+                onToggleNight={toggleNight}
                 minimapRef={minimapRef}
               />
-              {overlay === null && touch && <TouchControls onDir={onDir} onAction={interact} />}
+              {overlay === null && touch && <TouchControls onDir={onDir} onAction={interact} onSprint={(on) => engineRef.current?.setSprint(on)} />}
               {overlay === null && nearInfo && <NearPrompt verb={nearInfo.verb} label={nearInfo.label} onActivate={interact} />}
             </>
           )}
@@ -484,8 +540,21 @@ export default function Game() {
               focusId={overlay.focus}
               onOpenProject={openProject}
               onAbout={openAbout}
-              onContact={openContact}
+              onContact={() => openContact()}
               onClose={close}
+            />
+          )}
+          {overlay?.type === "house" && (
+            <HouseInterior
+              palette={character.palette}
+              night={night}
+              trophies={unlocked.size}
+              trophyTotal={ACHIEVEMENTS.length}
+              onReadAbout={readAbout}
+              onProfile={() => setOverlay({ type: "sheet", back: { type: "house" } })}
+              onQuestLog={() => setOverlay({ type: "log", back: { type: "house" } })}
+              onContact={() => openContact({ type: "house" })}
+              onExit={() => withIris(() => setOverlay(null))}
             />
           )}
           {overlay?.type === "pause" && (
@@ -495,6 +564,8 @@ export default function Game() {
               onLog={() => setOverlay({ type: "log", back: { type: "pause" } })}
               onSheet={() => setOverlay({ type: "sheet", back: { type: "pause" } })}
               onHelp={() => setOverlay({ type: "help", back: { type: "pause" } })}
+              night={night}
+              onToggleNight={toggleNight}
               onToggleSound={toggleSound}
               onTitle={toTitle}
             />
@@ -509,7 +580,7 @@ export default function Game() {
             onNewGame={newGame}
             onList={() => enterPlay({ type: "log" })}
             onHelp={() => setOverlay({ type: "help" })}
-            onContact={openContact}
+            onContact={() => openContact()}
             onToggleSound={toggleSound}
           />
         )}

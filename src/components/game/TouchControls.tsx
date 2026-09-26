@@ -9,9 +9,11 @@ import type { InputKey } from "@/game/engine";
 export function TouchControls({
   onDir,
   onAction,
+  onSprint,
 }: {
   onDir: (key: InputKey, on: boolean) => void;
   onAction: () => void;
+  onSprint: (on: boolean) => void;
 }) {
   const hold = (key: InputKey) => ({
     onPointerDown: (e: React.PointerEvent) => {
@@ -69,17 +71,35 @@ export function TouchControls({
         <span />
       </div>
 
-      <button
-        type="button"
-        aria-label="Action — interact with what's nearby"
-        onPointerDown={(e) => {
-          e.preventDefault();
-          onAction();
-        }}
-        className="a-btn pointer-events-auto"
-      >
-        A
-      </button>
+      <div className="pointer-events-auto flex items-end gap-3">
+        {/* B: hold to run */}
+        <button
+          type="button"
+          aria-label="Run — hold while moving"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+            onSprint(true);
+          }}
+          onPointerUp={() => onSprint(false)}
+          onPointerCancel={() => onSprint(false)}
+          onContextMenu={(e) => e.preventDefault()}
+          className="a-btn b-btn mb-10"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          aria-label="Action — interact with what's nearby"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onAction();
+          }}
+          className="a-btn"
+        >
+          A
+        </button>
+      </div>
     </div>
   );
 }

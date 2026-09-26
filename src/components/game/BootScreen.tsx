@@ -10,7 +10,9 @@ const TIPS = [
   "Press L any time for the Quest Log — every project in one list.",
   "Eight gems are hidden around town. Villagers know a thing or two.",
   "Villagers with a ! have something to tell you.",
-  "Esc opens the pause menu. Sound can be toggled there.",
+  "Hold Shift (or B on touch) to run.",
+  "Press N to switch between day and night — the lamps come on after dark.",
+  "Step inside the Traveler's Rest and use the computer to learn about Muneeb.",
   "Level up by discovering projects, gems and stories.",
 ];
 

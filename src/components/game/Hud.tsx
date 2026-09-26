@@ -24,6 +24,8 @@ export function Hud({
   onSheet,
   onContact,
   onMenu,
+  night,
+  onToggleNight,
   minimapRef,
 }: {
   level: number;
@@ -37,12 +39,15 @@ export function Hud({
   onSheet: () => void;
   onContact: () => void;
   onMenu: () => void;
+  night: boolean;
+  onToggleNight: () => void;
   minimapRef: (el: HTMLCanvasElement | null) => void;
 }) {
   const buttons: { icon: IconName; label: string; key: string; onClick: () => void }[] = [
     { icon: "book", label: "Quests", key: "L", onClick: onLog },
     { icon: "person", label: "Stats", key: "C", onClick: onSheet },
     { icon: "mail", label: "Contact", key: "M", onClick: onContact },
+    { icon: night ? "sun" : "moon", label: night ? "Day" : "Night", key: "N", onClick: onToggleNight },
     { icon: "menu", label: "Menu", key: "Esc", onClick: onMenu },
   ];
 
@@ -95,7 +100,7 @@ export function Hud({
             key={b.label}
             type="button"
             onClick={b.onClick}
-            className={`btn btn-wood btn-icon ${b.label === "Stats" ? "max-[380px]:hidden" : ""}`}
+            className={`btn btn-wood btn-icon ${b.label === "Stats" ? "max-[380px]:hidden" : b.key === "N" ? "max-[440px]:hidden" : ""}`}
             aria-label={b.label}
             title={`${b.label} (${b.key})`}
           >

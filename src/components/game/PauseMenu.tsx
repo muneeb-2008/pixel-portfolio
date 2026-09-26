@@ -11,6 +11,8 @@ export function PauseMenu({
   onSheet,
   onHelp,
   onToggleSound,
+  night,
+  onToggleNight,
   onTitle,
 }: {
   sound: boolean;
@@ -19,6 +21,8 @@ export function PauseMenu({
   onSheet: () => void;
   onHelp: () => void;
   onToggleSound: () => void;
+  night: boolean;
+  onToggleNight: () => void;
   onTitle: () => void;
 }) {
   return (
@@ -38,6 +42,15 @@ export function PauseMenu({
             ),
             onSelect: onToggleSound,
             hint: sound ? "On" : "Off",
+          },
+          {
+            label: (
+              <span className="flex items-center gap-3">
+                Time of day <PixelIcon name={night ? "moon" : "sun"} />
+              </span>
+            ),
+            onSelect: onToggleNight,
+            hint: night ? "Night" : "Day",
           },
           { label: "Title Screen", onSelect: onTitle },
         ]}
