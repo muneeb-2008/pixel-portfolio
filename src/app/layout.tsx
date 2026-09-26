@@ -1,92 +1,49 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
+import { Jersey_10, Pixelify_Sans, Silkscreen } from "next/font/google";
 import "./globals.css";
-import { site } from "@/content/site";
-import { AppLoader } from "@/components/loader/app-loader";
-import { Nav } from "@/components/nav/nav";
-import { Cursor } from "@/components/ui/cursor";
-import { SmoothScroll } from "@/components/providers/smooth-scroll";
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
+/** Display — titles, headings, big numbers. */
+const display = Jersey_10({
+  variable: "--font-jersey",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+/** UI — labels, buttons, HUD, in-world signs (designed on an 8px grid). */
+const ui = Silkscreen({
+  variable: "--font-silkscreen",
   subsets: ["latin"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
-const mono = JetBrains_Mono({
-  variable: "--font-mono-utility",
+/** Body — dialogue and reading text; a pixel face that stays legible at 16px. */
+const body = Pixelify_Sans({
+  variable: "--font-pixelify",
   subsets: ["latin"],
-  weight: ["400", "500"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: `${site.name} — ${site.role}`,
-    template: `%s — ${site.name}`,
-  },
-  description: site.metaDescription,
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: site.name,
-    title: `${site.name} — ${site.role}`,
-    description: site.metaDescription,
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${site.name} — ${site.role}`,
-    description: site.metaDescription,
-  },
+  title: "Pixel Portfolio — Explore the World",
+  description:
+    "A gamified pixel-art RPG portfolio. Explore districts, meet NPCs, and discover projects.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
-  colorScheme: "light",
+  themeColor: "#120d0b",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${bricolage.variable} ${inter.variable} ${mono.variable} h-full`}
-    >
-      <head>
-        {/* Reveal wrappers start at opacity 0 for the scroll animation; if JS
-            never runs, force them visible so nothing is lost. */}
-        <noscript>
-          <style
-            dangerouslySetInnerHTML={{
-              __html:
-                "[data-reveal]{opacity:1 !important;transform:none !important}",
-            }}
-          />
-        </noscript>
-      </head>
-      <body className="min-h-full">
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <AppLoader />
-        <Cursor />
-        <SmoothScroll>
-          <Nav />
-          <main id="main">{children}</main>
-        </SmoothScroll>
-      </body>
+    <html lang="en" className={`${display.variable} ${ui.variable} ${body.variable} h-full`}>
+      <body className="h-full">{children}</body>
     </html>
   );
 }

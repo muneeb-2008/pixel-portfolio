@@ -1,19 +1,13 @@
-import { Hero } from "@/components/sections/hero";
-import { Intro } from "@/components/sections/intro";
-import { Projects } from "@/components/sections/projects";
-import { Playground } from "@/components/sections/playground";
-import { CTA } from "@/components/sections/cta";
-import { Footer } from "@/components/sections/footer";
+import { GameLoader } from "@/components/game/GameLoader";
+import { PortfolioIndex } from "@/components/PortfolioIndex";
 
 export default function Home() {
   return (
     <>
-      <Hero />
-      <Intro />
-      <Projects />
-      <Playground />
-      <CTA />
-      <Footer />
+      {/* Server-rendered text version of everything in the world — for crawlers,
+          screen readers and no-JS visitors. The canvas game layers on top. */}
+      <PortfolioIndex />
+      <GameLoader />
     </>
   );
 }
