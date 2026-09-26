@@ -68,6 +68,52 @@ export function PortfolioIndex() {
                     {p.body.map((b) => (
                       <p key={b}>{b}</p>
                     ))}
+                    {p.caseStudy && (
+                      <dl>
+                        {p.caseStudy.role && (
+                          <>
+                            <dt>Role</dt>
+                            <dd>{p.caseStudy.role}</dd>
+                          </>
+                        )}
+                        {p.caseStudy.timeline && (
+                          <>
+                            <dt>Timeline</dt>
+                            <dd>{p.caseStudy.timeline}</dd>
+                          </>
+                        )}
+                        {p.caseStudy.problem && (
+                          <>
+                            <dt>The challenge</dt>
+                            <dd>{p.caseStudy.problem}</dd>
+                          </>
+                        )}
+                        {p.caseStudy.decision && (
+                          <>
+                            <dt>Key decision</dt>
+                            <dd>{p.caseStudy.decision}</dd>
+                          </>
+                        )}
+                        {p.caseStudy.process && (
+                          <>
+                            <dt>Approach</dt>
+                            <dd>
+                              <ol>
+                                {p.caseStudy.process.map((st) => (
+                                  <li key={st}>{st}</li>
+                                ))}
+                              </ol>
+                            </dd>
+                          </>
+                        )}
+                        {p.caseStudy.outcome && (
+                          <>
+                            <dt>What shipped</dt>
+                            <dd>{p.caseStudy.outcome}</dd>
+                          </>
+                        )}
+                      </dl>
+                    )}
                     <p>Tags: {p.tags.join(", ")}</p>
                     {p.link && (
                       <p>

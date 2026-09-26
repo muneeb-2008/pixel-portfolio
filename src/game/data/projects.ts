@@ -19,6 +19,23 @@ export const projects: Project[] = [
     tags: ["Product Design", "UI/UX", "Dashboard", "AI"],
     link: { label: "View project", url: "https://xtarc.agency/projects/mortime-ai-dashboard" },
     banner: ["MORTIME", "AI DASHBOARD"],
+    caseStudy: {
+      role: "AI product design & development at Xtarc",
+      timeline: "6 weeks",
+      problem:
+        "Mortime runs AI email, WhatsApp, Messenger and voice for real-estate agents — but leads, conversations, calls, campaigns and appointments lived in separate places, with no single view of how the automation was performing.",
+      decision:
+        "Bring every channel into one real-estate operations center, so multilingual responses, lead qualification, scheduling, follow-ups, knowledge and human handoffs work as one connected system.",
+      process: [
+        "Mapped the automated communication system end to end — email, WhatsApp & Messenger, and voice.",
+        "Designed a clear, data-rich dashboard that gives agents visibility into every part of it.",
+        "Structured the product into modules: leads, AI calls, conversations, campaigns, appointments, analytics, AI agents, knowledge base, integrations and performance reporting.",
+        "Built it as a live product accessed behind authentication.",
+      ],
+      outcome:
+        "A working AI SaaS dashboard: leads, AI calls, conversations, campaigns, appointments, analytics, AI agents, a knowledge base, integrations and performance reporting in one place.",
+      live: { label: "Visit site", url: "https://mortime.webflow.io/" },
+    },
   },
   {
     id: "auton8",
@@ -33,6 +50,22 @@ export const projects: Project[] = [
     tags: ["UI/UX", "Web Design", "AI", "Webflow"],
     link: { label: "View project", url: "https://xtarc.agency/projects/auton8" },
     banner: ["AUTON8", "ENTERPRISE"],
+    caseStudy: {
+      role: "Web design, development & AI integration at Xtarc",
+      timeline: "6 weeks",
+      problem:
+        "AUTON8 helps banks and complex organisations operate faster with stronger governance — but its product ecosystem is extensive and hard to take in at a glance.",
+      decision:
+        "Organise the whole ecosystem into three understandable capability layers: capture & reuse, automation & assurance, and orchestration & transformation.",
+      process: [
+        "Defined a bold enterprise identity.",
+        "Wrote modular product storytelling around the three capability layers.",
+        "Designed and developed a scalable, responsive Webflow site.",
+        "Integrated an AI assistant that helps visitors navigate the solutions and move toward booking a demo.",
+      ],
+      outcome:
+        "A live platform presenting AUTON8's no-code automation products across testing, deployment, operations, migration, documentation, observability and compliance.",
+    },
   },
   {
     id: "soal-labs",
@@ -47,6 +80,22 @@ export const projects: Project[] = [
     tags: ["Web Design", "UX", "Webflow", "AI"],
     link: { label: "View project", url: "https://xtarc.agency/projects/soal-labs" },
     banner: ["SOAL LABS", "DATA & AI"],
+    caseStudy: {
+      role: "Web design & development at Xtarc",
+      timeline: "4 weeks",
+      problem:
+        "Soal Labs helps private-capital firms modernise operations across the investment lifecycle — a highly technical offering that had to feel clear and credible to decision-makers.",
+      decision:
+        "A structured editorial layout that balances institutional authority with a modern, technology-led identity.",
+      process: [
+        "Framed the story around decision-makers' operational challenges.",
+        "Guided readers through service areas, AI maturity and the firm's approach.",
+        "Designed and developed a sophisticated Webflow website.",
+      ],
+      outcome:
+        "A live site positioning Soal Labs across fundraising, origination, due diligence, portfolio management, data infrastructure and AI workflows.",
+      live: { label: "Visit site", url: "https://www.soallabs.com/" },
+    },
   },
 
   // --- Agency Hall ---
@@ -63,6 +112,23 @@ export const projects: Project[] = [
     tags: ["UI/UX", "Framer", "Web Design", "AI"],
     link: { label: "View project", url: "https://xtarc.agency/projects/mortime" },
     banner: ["MORTIME", "WEBSITE"],
+    caseStudy: {
+      role: "Web design & development at Xtarc",
+      timeline: "4 weeks",
+      problem:
+        "Real-estate professionals need to respond to every lead without being available around the clock — and Mortime's managed AI service is complex to explain.",
+      decision:
+        "Tell a clear, human-centred story that positions Mortime as a dependable behind-the-scenes team for ambitious agents.",
+      process: [
+        "Introduced the AI-powered WhatsApp, Messenger, voice and email systems through focused product sections.",
+        "Visualised the workflows so the automation reads at a glance.",
+        "Added trust signals and conversion-led calls to action.",
+        "Designed and developed a premium Framer website.",
+      ],
+      outcome:
+        "A live site for Mortime's offering: multilingual messaging, voice-note handling, property-aware calling, appointment scheduling, lead logging, email classification, automated follow-ups, human handoffs and ongoing support.",
+      live: { label: "Visit mortime.ai", url: "https://www.mortime.ai/" },
+    },
   },
   {
     id: "xtarc",

@@ -72,10 +72,13 @@ export type Project = {
   /** optional case-study sections — each renders only when filled in */
   caseStudy?: {
     role?: string;
+    timeline?: string;
     problem?: string;
     process?: string[];
     decision?: string;
+    /** what actually shipped (no invented metrics) */
     outcome?: string;
+    live?: { label: string; url: string };
   };
 };
 

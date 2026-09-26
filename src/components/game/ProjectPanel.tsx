@@ -133,15 +133,15 @@ export function ProjectPanel({
         ))}
       </div>
 
-      {/* case study — Role · Problem · Process · Decision · Outcome (each only if provided) */}
+      {/* case study — Role · Timeline · Challenge · Approach · Key decision · What shipped (each only if provided) */}
       {project.caseStudy && (
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">
           {(
             [
-              ["My role", project.caseStudy.role],
-              ["The problem", project.caseStudy.problem],
+              ["Role", project.caseStudy.role],
+              ["Timeline", project.caseStudy.timeline],
+              ["The challenge", project.caseStudy.problem],
               ["Key decision", project.caseStudy.decision],
-              ["Outcome", project.caseStudy.outcome],
             ] as const
           )
             .filter(([, v]) => v)
@@ -153,7 +153,7 @@ export function ProjectPanel({
             ))}
           {project.caseStudy.process?.length ? (
             <div className="border-l-4 border-[color:var(--brass)] pl-3 sm:col-span-2">
-              <dt className="t-ui text-[0.75rem] font-bold text-[color:var(--parchment-ink-2)]">Process</dt>
+              <dt className="t-ui text-[0.75rem] font-bold text-[color:var(--parchment-ink-2)]">Approach</dt>
               <dd>
                 <ol className="t-body mt-1 flex list-decimal flex-col gap-1 pl-5 text-[1rem] leading-relaxed text-[color:var(--parchment-ink)]">
                   {project.caseStudy.process.map((step) => (
@@ -163,6 +163,22 @@ export function ProjectPanel({
               </dd>
             </div>
           ) : null}
+          {project.caseStudy.outcome && (
+            <div className="border-l-4 border-[color:var(--moss)] pl-3 sm:col-span-2">
+              <dt className="t-ui text-[0.75rem] font-bold text-[color:var(--parchment-ink-2)]">What shipped</dt>
+              <dd className="t-body mt-1 text-[1rem] leading-relaxed text-[color:var(--parchment-ink)]">
+                {project.caseStudy.outcome}
+                {project.caseStudy.live && (
+                  <>
+                    {" "}
+                    <a href={project.caseStudy.live.url} target="_blank" rel="noopener noreferrer" className="whitespace-nowrap font-bold underline underline-offset-4">
+                      {project.caseStudy.live.label} ↗<span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  </>
+                )}
+              </dd>
+            </div>
+          )}
         </dl>
       )}
 
