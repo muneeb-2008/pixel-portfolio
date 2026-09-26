@@ -17,7 +17,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/dashboard-1.webp", "/work/dashboard-2.webp", "/work/dashboard-3.webp"],
     tags: ["Product Design", "UI/UX", "Dashboard", "AI"],
-    link: { label: "View project", url: "https://xtarc.agency/projects/mortime-ai-dashboard" },
     banner: ["MORTIME", "AI DASHBOARD"],
     caseStudy: {
       role: "AI product design & development at Xtarc",
@@ -34,7 +33,6 @@ export const projects: Project[] = [
       ],
       outcome:
         "A working AI SaaS dashboard: leads, AI calls, conversations, campaigns, appointments, analytics, AI agents, a knowledge base, integrations and performance reporting in one place.",
-      live: { label: "Visit site", url: "https://mortime.webflow.io/" },
     },
   },
   {
@@ -48,7 +46,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/auton8-1.webp", "/work/auton8-2.webp"],
     tags: ["UI/UX", "Web Design", "AI", "Webflow"],
-    link: { label: "View project", url: "https://xtarc.agency/projects/auton8" },
     banner: ["AUTON8", "ENTERPRISE"],
     caseStudy: {
       role: "Web design, development & AI integration at Xtarc",
@@ -78,7 +75,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/soal-1.webp", "/work/soal-2.webp", "/work/soal-3.webp"],
     tags: ["Web Design", "UX", "Webflow", "AI"],
-    link: { label: "View project", url: "https://xtarc.agency/projects/soal-labs" },
     banner: ["SOAL LABS", "DATA & AI"],
     caseStudy: {
       role: "Web design & development at Xtarc",
@@ -94,7 +90,6 @@ export const projects: Project[] = [
       ],
       outcome:
         "A live site positioning Soal Labs across fundraising, origination, due diligence, portfolio management, data infrastructure and AI workflows.",
-      live: { label: "Visit site", url: "https://www.soallabs.com/" },
     },
   },
 
@@ -110,7 +105,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/mortime-1.webp", "/work/mortime-2.webp", "/work/mortime-3.webp"],
     tags: ["UI/UX", "Framer", "Web Design", "AI"],
-    link: { label: "View project", url: "https://xtarc.agency/projects/mortime" },
     banner: ["MORTIME", "WEBSITE"],
     caseStudy: {
       role: "Web design & development at Xtarc",
@@ -127,7 +121,6 @@ export const projects: Project[] = [
       ],
       outcome:
         "A live site for Mortime's offering: multilingual messaging, voice-note handling, property-aware calling, appointment scheduling, lead logging, email classification, automated follow-ups, human handoffs and ongoing support.",
-      live: { label: "Visit mortime.ai", url: "https://www.mortime.ai/" },
     },
   },
   {
@@ -142,7 +135,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/xtarc-1.webp"],
     tags: ["Product Design", "UI/UX", "Framer", "AI"],
-    link: { label: "Visit Xtarc", url: "https://xtarc.agency/" },
     banner: ["XTARC", "AGENCY"],
   },
 
@@ -159,7 +151,6 @@ export const projects: Project[] = [
     ],
     gallery: ["/work/pixel-1.webp"],
     tags: ["Creative Development", "UI", "Interaction", "AI"],
-    link: { label: "Explore the code", url: "https://github.com/muneeb-2008/pixel-portfolio" },
     banner: ["PIXEL", "PORTFOLIO"],
   },
   {
