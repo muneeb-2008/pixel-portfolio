@@ -19,7 +19,7 @@ export type LetterDraft = { name: string; email: string; msg: string };
 const ENDPOINT = `https://formsubmit.co/ajax/${contact.email}`;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type Status = "idle" | "sending" | "sent" | "error";
+type Status = "idle" | "sending" | "sent" | "error" | "inactive";
 
 /** Draft lives in the parent so closing the mailbox never throws a message away. */
 export function ContactForm({
@@ -75,7 +75,13 @@ export function ContactForm({
           _captcha: "false",
         }),
       });
-      const data = (await res.json().catch(() => ({}))) as { success?: string | boolean };
+      const data = (await res.json().catch(() => ({}))) as { success?: string | boolean; message?: string };
+      // FormSubmit answers 200 + success:"false" until the inbox owner clicks its one-time activation link
+      if (/activat/i.test(data.message ?? "")) {
+        setStatus("inactive");
+        play("back");
+        return;
+      }
       if (!res.ok || String(data.success) === "false") throw new Error("send failed");
       setStatus("sent");
       play("achieve");
@@ -164,6 +170,15 @@ export function ContactForm({
           {error && (
             <p className="t-body text-[1rem] text-[color:var(--ember)]" role="alert">
               {error}
+            </p>
+          )}
+          {status === "inactive" && (
+            <p className="t-body text-[1rem] text-[color:var(--ember)]" role="alert">
+              The mailbox isn&apos;t switched on yet — it&apos;s waiting for its one-time activation.{" "}
+              <a href={mailto} className="underline underline-offset-4">
+                Send your letter from your email app
+              </a>{" "}
+              for now.
             </p>
           )}
           {status === "error" && (
