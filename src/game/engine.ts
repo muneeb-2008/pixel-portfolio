@@ -50,7 +50,7 @@ const SPEED = 96; // world px / sec (walk)
 const SPRINT = 1.75; // hold Shift / B to run
 const NPC_SPEED = 26;
 const ENTER_R = 11; // walk-in radius (px) around a door's front spot
-const REACH_R = 26; // Enter / A interaction radius
+const REACH_R = 30; // Enter / A interaction radius
 const HINT_R = REACH_R; // the prompt only shows where Enter actually works
 const SLIDE = 7; // px of corner forgiveness when bumping an edge
 const GEM_R = 10;
@@ -127,6 +127,9 @@ export class Game {
   private near: Trigger | null = null;
   private ready = false;
   private reduceMotion = false;
+  private frameDt = 1 / 60;
+  /** CSS px of HUD at the top of the screen that the camera should keep clear */
+  private safeTopCss = 0;
   /** 0 = day … 1 = full night (eased toward nightTarget) */
   private night = 0;
   private nightTarget = 0;
@@ -183,9 +186,11 @@ export class Game {
       { palette: this.character.palette, hat: "none" as const },
       ...this.content.npcs.map((n) => ({ palette: n.palette, hat: n.hat })),
     ];
-    for (const l of looks)
+    for (const l of looks) {
       for (const d of ["down", "up", "left", "right"] as Dir[])
         for (const f of [0, 1, 2, 3] as AnimFrame[]) spriteCanvas(l.palette, d, f, l.hat);
+      await nextFrame();
+    }
     this.resize();
     report(1);
     this.ready = true;
@@ -217,6 +222,29 @@ export class Game {
     this.paused = p;
     this.clearInput();
     if (!p) this.last = performance.now();
+  }
+
+  /** Keep this many CSS px at the top clear of important world art (the HUD). */
+  setSafeTop(cssPx: number) {
+    this.safeTopCss = cssPx;
+  }
+
+  private safeTopWorld() {
+    const rect = this.canvas.getBoundingClientRect();
+    if (!rect.height) return 0;
+    return (this.safeTopCss * (this.canvas.height / rect.height)) / this.scale;
+  }
+
+  /** Put the player on a trigger's front spot facing away from it (e.g. walking out of a house). */
+  stepOutOf(triggerId: string) {
+    const t = this.triggers.find((x) => x.id === triggerId);
+    if (!t) return;
+    this.player.x = t.cx - 7.5;
+    this.player.y = t.cy - 18 + 4;
+    this.player.dir = "down";
+    this.player.step = 0;
+    this.disarmed = t.id;
+    this.camSnapped = false;
   }
 
   /** Day / night. The world eases into the new lighting over ~1s. */
@@ -571,7 +599,7 @@ export class Game {
 
     // Walking *into* a door (pressing up at its front spot) enters it. Strolling
     // past along the road never does — Enter / A covers deliberate interaction.
-    if (hit && hit.t.type !== "villager" && !this.disarmed && hit.d <= ENTER_R && this.input.up && p.dir === "up") {
+    if (hit && (hit.t.type === "project" || hit.t.type === "about") && !this.disarmed && hit.d <= ENTER_R && this.input.up && p.dir === "up") {
       this.fire(hit.t);
     }
   }
@@ -581,7 +609,7 @@ export class Game {
     for (const w of this.walkers) {
       const wf = this.feet(w);
       // stop and look at the player when they come close
-      if (!this.attract && Math.hypot(wf.x - pf.x, wf.y - pf.y) < 20) {
+      if (!this.attract && Math.hypot(wf.x - pf.x, wf.y - pf.y) < 40) {
         const dx = pf.x - wf.x;
         const dy = pf.y - wf.y;
         w.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
@@ -666,7 +694,7 @@ export class Game {
     const s = this.scale;
     const ctx = this.ctx;
     // Silkscreen is designed on an 8px grid — snap to it for crisp glyphs
-    const size = Math.max(8, Math.floor((t.size * s * 1.25) / 8) * 8);
+    const size = Math.max(8, Math.round((t.size * s) / 8) * 8);
     ctx.font = `${size}px ${this.pixelFont}`;
     ctx.fillStyle = t.color;
     ctx.fillText(t.text, Math.round((t.x - camX) * s), Math.round((t.y - camY) * s));
@@ -675,7 +703,7 @@ export class Game {
   private cameraTarget(viewW: number, viewH: number) {
     const worldW = this.world.cols * T;
     const worldH = this.world.rows * T;
-    const clampCam = (v: number, max: number) => (max < 0 ? max / 2 : Math.max(0, Math.min(max, v)));
+    const clampCam = (v: number, max: number, min = 0) => (max < min ? (max + min) / 2 : Math.max(min, Math.min(max, v)));
     let fx = this.player.x + 8;
     let fy = this.player.y + 11;
     if (this.attract) {
@@ -684,7 +712,7 @@ export class Game {
       fx = worldW / 2 + Math.sin(t) * (worldW * 0.3);
       fy = worldH / 2 + Math.sin(t * 1.7) * (worldH * 0.22);
     }
-    return { x: clampCam(fx - viewW / 2, worldW - viewW), y: clampCam(fy - viewH / 2, worldH - viewH) };
+    return { x: clampCam(fx - viewW / 2, worldW - viewW), y: clampCam(fy - viewH / 2, worldH - viewH, -this.safeTopWorld()) };
   }
 
   private render() {
@@ -699,7 +727,8 @@ export class Game {
       this.cam.y = target.y;
       this.camSnapped = true;
     } else {
-      const k = this.attract ? 0.04 : 0.12;
+      // exponential smoothing: same feel at 30, 60 or 144 fps
+      const k = 1 - Math.exp(-this.frameDt * (this.attract ? 2.5 : 7.5));
       this.cam.x += (target.x - this.cam.x) * k;
       this.cam.y += (target.y - this.cam.y) * k;
     }
@@ -764,7 +793,8 @@ export class Game {
       });
       ctx.fillStyle = "rgba(0,0,0,0.22)";
       ctx.fillRect(sx(gx + 4), sy(gy + 2), 3 * s, 4 * s);
-      if (!this.reduceMotion && Math.floor(this.time * 2 + g.tx) % 5 === 0) {
+      const close = Math.hypot(g.tx * T + 8 - this.feet().x, g.ty * T + 10 - this.feet().y) < 56;
+      if (close && !this.reduceMotion && Math.floor(this.time * 3 + g.tx) % 3 === 0) {
         ctx.fillStyle = "#fff";
         ctx.fillRect(sx(gx + 6), sy(gy - 3), s, 3 * s);
         ctx.fillRect(sx(gx + 5), sy(gy - 2), 3 * s, s);
@@ -775,16 +805,15 @@ export class Game {
     const inView = (o: { x: number; y: number; w: number; h: number }) =>
       o.x + o.w > camX && o.x < camX + viewW && o.y + o.h > camY && o.y < camY + viewH;
     const list: { base: number; draw: () => void }[] = [];
+    const texts: { text: string; x: number; y: number; size: number; color: string }[] = [];
+    const bubbles: Walker[] = [];
     for (const o of this.objects) {
       if (!inView(o)) continue;
       list.push({
         base: o.baseY,
         draw: () => {
           ctx.drawImage(o.canvas, sx(o.x), sy(o.y), o.w * s, o.h * s);
-          if (!o.texts.length) return;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          for (const t of o.texts) this.drawText(t, camX, camY);
+          if (o.texts.length) texts.push(...o.texts);
         },
       });
     }
@@ -802,24 +831,26 @@ export class Game {
         base: w.y + 21,
         draw: () => {
           drawActor(w, w.npc.palette, w.npc.hat);
-          // "!" bubble over villagers you haven't met yet
-          if (!this.talked.has(w.v.id) && !this.attract) {
-            const bob = this.reduceMotion ? 0 : Math.round(Math.sin(this.time * 4) * 1);
-            const bxp = w.x + 5;
-            const byp = w.y - 11 + bob;
-            ctx.fillStyle = "#120c09";
-            ctx.fillRect(sx(bxp - 1), sy(byp - 1), 8 * s, 10 * s);
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(sx(bxp), sy(byp), 6 * s, 8 * s);
-            ctx.fillStyle = "#e46a4b";
-            ctx.fillRect(sx(bxp + 2), sy(byp + 1), 2 * s, 4 * s);
-            ctx.fillRect(sx(bxp + 2), sy(byp + 6), 2 * s, s);
-          }
+          if (!this.talked.has(w.v.id) && !this.attract) bubbles.push(w);
         },
       });
     }
     list.push({ base: this.player.y + 21, draw: () => drawActor(this.player, this.character.palette, "none") });
     list.sort((a, b) => a.base - b.base).forEach((d) => d.draw());
+
+    // "!" bubble over villagers you haven't met yet (after actors: never hidden, never over-drawn)
+    for (const w of bubbles) {
+      const bob = this.reduceMotion ? 0 : Math.round(Math.sin(this.time * 4) * 1);
+      const bxp = w.x + 5;
+      const byp = w.y - 11 + bob;
+      ctx.fillStyle = "#120c09";
+      ctx.fillRect(sx(bxp - 1), sy(byp - 1), 8 * s, 10 * s);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(sx(bxp), sy(byp), 6 * s, 8 * s);
+      ctx.fillStyle = "#e46a4b";
+      ctx.fillRect(sx(bxp + 2), sy(byp + 1), 2 * s, 4 * s);
+      ctx.fillRect(sx(bxp + 2), sy(byp + 6), 2 * s, s);
+    }
 
     // particles
     for (const pt of this.particles) {
@@ -831,7 +862,7 @@ export class Game {
 
     // drifting cloud shadows — stepped in 2-art-px rows so edges stay on the pixel grid
     if (!this.reduceMotion) {
-      ctx.fillStyle = "rgba(20, 30, 50, 0.09)";
+      ctx.fillStyle = "rgba(20, 30, 50, 0.05)";
       for (const c of this.clouds) {
         if (c.x + c.w < camX || c.x - c.w > camX + viewW) continue;
         const blob = (cx: number, cy: number, rx: number, ry: number) => {
@@ -848,6 +879,11 @@ export class Game {
     }
 
     if (this.night > 0.001) this.renderNight(camX, camY, viewW, viewH);
+
+    // world labels last, above the night layer, so they stay readable after dark
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (const t of texts) this.drawText(t, camX, camY);
 
     // bobbing marker above the door glow (last, so nothing hides it)
     if (door) {
@@ -953,12 +989,6 @@ export class Game {
     m.imageSmoothingEnabled = false;
     m.drawImage(this.miniBase, 0, 0);
     const k = MINI / T;
-    // remaining gems as tiny sparkles
-    for (const g of this.content.gems) {
-      if (this.collected.has(g.id)) continue;
-      m.fillStyle = g.color;
-      m.fillRect(g.tx * MINI, g.ty * MINI, 2, 2);
-    }
     // villagers
     m.fillStyle = "#f6ead2";
     for (const w of this.walkers) m.fillRect(Math.round(this.feet(w).x * k) - 1, Math.round(this.feet(w).y * k) - 1, 2, 2);
@@ -981,6 +1011,7 @@ export class Game {
     let dt = (now - this.last) / 1000;
     this.last = now;
     if (dt > 0.05) dt = 0.05;
+    this.frameDt = dt;
     this.time += dt;
     if (this.attract) {
       this.attractT += dt;

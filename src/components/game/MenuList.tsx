@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { play } from "@/game/audio";
 
 export type MenuItem = {
@@ -16,6 +16,7 @@ export type MenuItem = {
  */
 export function MenuList({ items, label, autoFocus = true }: { items: MenuItem[]; label: string; autoFocus?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
 
   useEffect(() => {
     if (!autoFocus) return;
@@ -46,6 +47,8 @@ export function MenuList({ items, label, autoFocus = true }: { items: MenuItem[]
           role="menuitem"
           className="menu-item"
           disabled={it.disabled}
+          tabIndex={i === active ? 0 : -1}
+          onFocus={() => setActive(i)}
           onMouseEnter={(e) => {
             if (document.activeElement !== e.currentTarget) {
               e.currentTarget.focus({ preventScroll: true });
@@ -58,7 +61,11 @@ export function MenuList({ items, label, autoFocus = true }: { items: MenuItem[]
           }}
         >
           <span className="flex-1">{it.label}</span>
-          {it.hint && <span className="text-[0.75rem] text-[color:var(--text-3)]">{it.hint}</span>}
+          {it.hint && (
+            <span className="text-[0.75rem] text-[color:var(--text-3)]" aria-hidden>
+              {it.hint}
+            </span>
+          )}
         </button>
       ))}
     </div>

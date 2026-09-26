@@ -602,7 +602,7 @@ function billboard(ctx: CanvasRenderingContext2D, b: Building, lines: [string, s
     ctx.drawImage(img, lx + 2, ly + 2, BILL_W, BILL_H);
     ctx.restore();
     px(ctx, lx + 2, ly + 2, BILL_W, 1, "rgba(255,255,255,0.25)"); // glass sheen
-    return [{ text: lines[0], x: cx, y: ly + BILL_H + 7, size: 5, color: C.accent3 }];
+    return [{ text: lines[0], x: cx, y: ly + BILL_H + 7, size: 6, color: C.accent3 }];
   }
   // text-only plate
   ctx.save();
@@ -613,7 +613,7 @@ function billboard(ctx: CanvasRenderingContext2D, b: Building, lines: [string, s
   ctx.restore();
   return [
     { text: lines[0], x: cx, y: ly + 14, size: 6, color: C.accent3 },
-    { text: lines[1], x: cx, y: ly + 24, size: 4, color: "#cdb994" },
+    { text: lines[1], x: cx, y: ly + 25, size: 3, color: "#cdb994" },
   ];
 }
 
@@ -632,7 +632,7 @@ export function drawInn(ctx: CanvasRenderingContext2D, gx: number, gy: number, w
 type Arrow = "left" | "right" | "up" | null;
 const ARROWS: Record<string, Arrow> = { "◀": "left", "▶": "right", "▲": "up", "<": "left", ">": "right", "^": "up" };
 const ARROW_W = 7; // art px reserved for the arrow (+gap)
-const signWidth = (label: string, arrow: Arrow) => Math.max(22, label.length * 6 + 10 + (arrow ? ARROW_W : 0));
+const signWidth = (label: string, arrow: Arrow) => Math.max(24, label.length * 7 + 10 + (arrow ? ARROW_W : 0));
 
 function signArrow(ctx: CanvasRenderingContext2D, x: number, y: number, dir: Exclude<Arrow, null>) {
   const c = "#f6e7c6";
@@ -653,10 +653,10 @@ function sign(ctx: CanvasRenderingContext2D, gx: number, gy: number, label: stri
   // board with a recessed dark plate for high-contrast engraved text
   const bw = signWidth(label, arrow);
   const bxx = Math.round(bx + 8 - bw / 2);
-  px(ctx, bxx - 1, by + 1, bw + 2, 11, C.woodDark); // frame
-  px(ctx, bxx, by + 2, bw, 9, C.wood); // board face
-  px(ctx, bxx + 1, by + 2, bw - 2, 1, "#c99a63"); // top highlight
-  px(ctx, bxx + 1, by + 3, bw - 2, 7, "#3a230e"); // engraved dark inset
+  px(ctx, bxx - 1, by - 1, bw + 2, 14, C.woodDark); // frame
+  px(ctx, bxx, by, bw, 12, C.wood); // board face
+  px(ctx, bxx + 1, by, bw - 2, 1, "#c99a63"); // top highlight
+  px(ctx, bxx + 1, by + 1, bw - 2, 10, "#3a230e"); // engraved dark inset
   if (arrow) signArrow(ctx, bxx + 4, by + 4, arrow);
 }
 
@@ -747,11 +747,11 @@ export function buildObjects(world: WorldData, banners: Record<string, [string, 
     const bw = signWidth(label, arrow);
     const x = Math.floor(s.tx * T + 8 - bw / 2 - 1);
     objs.push(
-      makeObject(x, s.ty * T, bw + 4, T + 3, (s.ty + 1) * T, (ctx) => {
+      makeObject(x, s.ty * T - 2, bw + 4, T + 5, (s.ty + 1) * T, (ctx) => {
         sign(ctx, s.tx, s.ty, label, arrow);
         // text centred in the space right of the arrow
         const cx = s.tx * T + 8 + (arrow ? ARROW_W / 2 : 0);
-        return [{ text: label, x: cx, y: s.ty * T + 7, size: 6, color: "#f6e7c6" }];
+        return [{ text: label, x: cx, y: s.ty * T + 6, size: 8, color: "#f6e7c6" }];
       }),
     );
   });
@@ -784,9 +784,36 @@ export function buildStaticWorld(world: WorldData): HTMLCanvasElement {
       }
       // one continuous meadow (per-zone tints read as hard rectangles); gentle
       // large-scale mottling keeps it from looking flat
-      grassTile(ctx, gx, gy, hash(tx * 7, ty * 3) > 0.8 ? "#75b057" : C.grass);
+      grassTile(ctx, gx, gy, C.grass);
       if (world.paths.some((p) => inRect(tx, ty, p))) pathTile(ctx, gx, gy);
       if (world.water.some((p) => inRect(tx, ty, p))) drawWaterTile(ctx, gx, gy, 1, 0);
+    }
+  }
+
+  // edges: paths get a darker rim + soft grass lip; the pond gets a sandy shore
+  const isPath = (tx: number, ty: number) => world.paths.some((p) => inRect(tx, ty, p));
+  const isWater = (tx: number, ty: number) => world.water.some((p) => inRect(tx, ty, p));
+  for (let ty = 2; ty < world.rows - 2; ty++) {
+    for (let tx = 2; tx < world.cols - 2; tx++) {
+      const gx = tx * T;
+      const gy = ty * T;
+      if (isWater(tx, ty)) {
+        if (!isWater(tx, ty - 1)) { px(ctx, gx, gy, T, 3, "#e3cf9c"); px(ctx, gx, gy + 3, T, 1, C.waterLite); }
+        if (!isWater(tx, ty + 1)) px(ctx, gx, gy + T - 2, T, 2, "#3f8cc4");
+        if (!isWater(tx - 1, ty)) px(ctx, gx, gy, 2, T, "#e3cf9c");
+        if (!isWater(tx + 1, ty)) px(ctx, gx + T - 2, gy, 2, T, "#e3cf9c");
+      } else if (isPath(tx, ty)) {
+        const up = isPath(tx, ty - 1), dn = isPath(tx, ty + 1), lf = isPath(tx - 1, ty), rt = isPath(tx + 1, ty);
+        if (!up) { px(ctx, gx, gy, T, 1, C.pathEdge); for (let x = gx + 1; x < gx + T; x += 4) px(ctx, x, gy, 2, 1, C.grassDark); }
+        if (!dn) px(ctx, gx, gy + T - 1, T, 1, C.pathEdge);
+        if (!lf) px(ctx, gx, gy, 1, T, C.pathEdge);
+        if (!rt) px(ctx, gx + T - 1, gy, 1, T, C.pathEdge);
+        // rounded outer corners
+        if (!up && !lf) px(ctx, gx, gy, 2, 2, C.grass);
+        if (!up && !rt) px(ctx, gx + T - 2, gy, 2, 2, C.grass);
+        if (!dn && !lf) px(ctx, gx, gy + T - 2, 2, 2, C.grass);
+        if (!dn && !rt) px(ctx, gx + T - 2, gy + T - 2, 2, 2, C.grass);
+      }
     }
   }
 

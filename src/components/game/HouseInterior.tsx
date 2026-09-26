@@ -38,6 +38,8 @@ export function HouseInterior({
   onQuestLog,
   onContact,
   onExit,
+  openPc = false,
+  onToggleNight,
 }: {
   palette: Palette;
   night: boolean;
@@ -48,18 +50,47 @@ export function HouseInterior({
   onQuestLog: () => void;
   onContact: () => void;
   onExit: () => void;
+  /** open straight onto the PC (About) — e.g. from the Quest Log's About button */
+  openPc?: boolean;
+  onToggleNight?: () => void;
 }) {
   const touch = useInputModeValue() === "touch";
+  const touchRef = useRef(touch);
+  useEffect(() => {
+    touchRef.current = touch;
+  }, [touch]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [sub, setSub] = useState<Sub>(null);
+  const [sub, setSub] = useState<Sub>(openPc ? { type: "pc" } : null);
+  const leaveRef = useRef<HTMLButtonElement>(null);
+  const exiting = useRef(false);
+  /** exit exactly once, however many times Esc / Leave / the mat fire */
+  const exitOnce = useCallback(() => {
+    if (exiting.current) return;
+    exiting.current = true;
+    play("back");
+    onExit();
+  }, [onExit]);
+  // reading the PC on arrival counts as reading the About
+  useEffect(() => {
+    if (openPc) onReadAbout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // land keyboard focus on something useful (not <body>)
+  useEffect(() => {
+    if (!openPc) leaveRef.current?.focus({ preventScroll: true });
+  }, [openPc]);
+  const toggleNightRef = useRef(onToggleNight);
+  useEffect(() => {
+    toggleNightRef.current = onToggleNight;
+  }, [onToggleNight]);
   const subRef = useRef<Sub>(null);
   const [near, setNear] = useState<Hotspot | null>(null);
   const nearRef = useRef<Hotspot | null>(null);
   const input = useRef({ up: false, down: false, left: false, right: false, run: false });
   const exitRef = useRef(onExit);
   useEffect(() => {
-    exitRef.current = onExit;
-  }, [onExit]);
+    exitRef.current = exitOnce;
+  }, [exitOnce]);
   useEffect(() => {
     subRef.current = sub;
     input.current = { up: false, down: false, left: false, right: false, run: false };
@@ -186,12 +217,27 @@ export function HouseInterior({
       }
 
       // ---- draw: room centred, integer scale
-      const s = Math.max(1, Math.floor(Math.min(cv.width / (ROOM_COLS * RT + 16), cv.height / (ROOM_ROWS * RT + 40))));
+      const dpr = cv.width / Math.max(1, cv.getBoundingClientRect().width);
+      const touchUi = touchRef.current;
+      const topPad = 64 * dpr;
+      const botPad = (touchUi ? 230 : 24) * dpr;
+      const availH = cv.height - topPad - botPad;
+      const fitS = Math.max(1, Math.floor(Math.min((cv.width - 24 * dpr) / (ROOM_COLS * RT + 12), availH / (ROOM_ROWS * RT + 12))));
+      const narrow = cv.width / dpr < 640;
+      const worldS = Math.max(2, Math.floor(Math.min(cv.width / (RT * (narrow ? 13 : 24)), cv.height / (RT * (narrow ? 12 : 14)))));
+      const s = Math.min(fitS, worldS + (touchUi ? 1 : 0));
       const ox = Math.floor((cv.width - ROOM_COLS * RT * s) / 2);
-      const oy = Math.floor((cv.height - ROOM_ROWS * RT * s) / 2) + Math.floor(12 * s);
+      const oy = Math.floor(topPad + (availH - ROOM_ROWS * RT * s) / 2);
       ctx.imageSmoothingEnabled = false;
-      ctx.fillStyle = "#120d0b";
+      // surroundings: dark timber walls + vignette instead of a black void
+      ctx.fillStyle = "#1c1410";
       ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = "#241a14";
+      for (let y = 0; y < cv.height; y += 8 * s) ctx.fillRect(0, y, cv.width, 4 * s);
+      ctx.fillStyle = "#3a2616";
+      ctx.fillRect(ox - 6 * s, oy - 6 * s, (ROOM_COLS * RT + 12) * s, (ROOM_ROWS * RT + 12) * s);
+      ctx.fillStyle = "#5e3a22";
+      ctx.fillRect(ox - 4 * s, oy - 4 * s, (ROOM_COLS * RT + 8) * s, (ROOM_ROWS * RT + 8) * s);
       ctx.drawImage(room, ox, oy, room.width * s, room.height * s);
       // monitor cursor blink
       if (reduce || Math.floor(time * 2) % 2 === 0) {
@@ -255,9 +301,9 @@ export function HouseInterior({
       }
       if (k === "escape") {
         e.preventDefault();
-        play("back");
         exitRef.current();
       }
+      if (k === "n") toggleNightRef.current?.();
     };
     const up = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -283,11 +329,9 @@ export function HouseInterior({
       <div className="fixed right-3 top-3">
         <button
           type="button"
+          ref={leaveRef}
           className="btn btn-wood"
-          onClick={() => {
-            play("back");
-            onExit();
-          }}
+          onClick={exitOnce}
         >
           <PixelIcon name="door" /> Leave
           <span className="kbd" aria-hidden>
@@ -296,6 +340,16 @@ export function HouseInterior({
         </button>
       </div>
 
+      {!sub && (
+        <nav className="fixed left-3 top-16 hidden flex-col gap-1.5 lg:flex" aria-label="In this room">
+          <p className="t-ui text-[0.75rem] text-[color:var(--text-3)]">In this room</p>
+          {HOTSPOTS.filter((h) => h.id !== "window").map((h) => (
+            <button key={h.id} type="button" className="btn btn-wood justify-start" onClick={() => activate(h)}>
+              {h.label}
+            </button>
+          ))}
+        </nav>
+      )}
       {!sub && near && <NearPrompt verb={near.verb} label={near.label} onActivate={() => activate(near)} />}
       {!sub && touch && (
         <TouchControls

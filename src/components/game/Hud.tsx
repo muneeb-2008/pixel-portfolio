@@ -5,6 +5,7 @@ import { character } from "@/game/data/character";
 import { SpritePortrait } from "./SpritePortrait";
 import { PixelIcon, type IconName } from "./PixelIcon";
 import { useInputModeValue } from "./inputMode";
+import { play, type Sfx } from "@/game/audio";
 
 /**
  * Top HUD.
@@ -43,12 +44,12 @@ export function Hud({
   onToggleNight: () => void;
   minimapRef: (el: HTMLCanvasElement | null) => void;
 }) {
-  const buttons: { icon: IconName; label: string; key: string; onClick: () => void }[] = [
-    { icon: "book", label: "Quests", key: "L", onClick: onLog },
-    { icon: "person", label: "Stats", key: "C", onClick: onSheet },
-    { icon: "mail", label: "Contact", key: "M", onClick: onContact },
-    { icon: night ? "sun" : "moon", label: night ? "Day" : "Night", key: "N", onClick: onToggleNight },
-    { icon: "menu", label: "Menu", key: "Esc", onClick: onMenu },
+  const buttons: { icon: IconName; label: string; aria: string; key: string; onClick: () => void; optional?: boolean }[] = [
+    { icon: "book", label: "Quests", aria: "Quest Log", key: "L", onClick: onLog, optional: true },
+    { icon: "person", label: "Profile", aria: "Player Profile", key: "C", onClick: onSheet, optional: true },
+    { icon: "mail", label: "Contact", aria: "Contact", key: "M", onClick: onContact },
+    { icon: night ? "moon" : "sun", label: night ? "Night" : "Day", aria: `Time of day: ${night ? "night" : "day"}. Switch to ${night ? "day" : "night"}`, key: "N", onClick: onToggleNight, optional: true },
+    { icon: "menu", label: "Menu", aria: "Menu", key: "Esc", onClick: onMenu },
   ];
 
   return (
@@ -61,16 +62,14 @@ export function Hud({
           type="button"
           onClick={onLog}
           className="panel slide-down flex items-center gap-3 px-1.5 py-1 text-left"
-          aria-label={`Level ${level}. ${found} of ${total} projects, ${gems} of ${gemTotal} gems. Open Quest Log.`}
+          aria-label={`Your explorer level ${level}. ${found} of ${total} projects, ${gems} of ${gemTotal} gems. Open Quest Log.`}
         >
           <span className="well hidden p-0.5 sm:block">
             <SpritePortrait palette={character.palette} scale={2} />
           </span>
           <span className="flex min-w-0 flex-col gap-1">
             <span className="flex items-center gap-2">
-              <span className="t-ui hidden max-w-[10rem] truncate text-[0.75rem] text-[color:var(--text)] sm:inline">
-                {character.name}
-              </span>
+              <span className="t-ui hidden text-[0.75rem] text-[color:var(--text-2)] sm:inline">Explorer</span>
               <span className="t-ui bg-[color:var(--gold)] px-1.5 py-px text-[0.75rem] font-bold text-[#2a1a0c]">
                 LV {level}
               </span>
@@ -100,9 +99,9 @@ export function Hud({
             key={b.label}
             type="button"
             onClick={b.onClick}
-            className={`btn btn-wood btn-icon ${b.label === "Stats" ? "max-[380px]:hidden" : b.key === "N" ? "max-[440px]:hidden" : ""}`}
-            aria-label={b.label}
-            title={`${b.label} (${b.key})`}
+            className={`btn btn-wood btn-icon ${b.optional ? "hud-opt" : ""}`}
+            aria-label={b.aria}
+            title={`${b.aria} (${b.key})`}
           >
             <PixelIcon name={b.icon} />
             <span className="hidden lg:inline">{b.label}</span>
@@ -120,7 +119,7 @@ export function Hud({
 export function NearPrompt({ verb, label, onActivate }: { verb: string; label: string; onActivate: () => void }) {
   const touch = useInputModeValue() === "touch";
   return (
-    <div className={`pointer-events-none fixed inset-x-0 z-30 flex justify-center px-3 ${touch ? "bottom-[13.5rem]" : "bottom-6"}`}>
+    <div className={`pointer-events-none fixed inset-x-0 z-30 flex justify-center px-3 ${touch ? "bottom-[13.5rem] [@media(max-height:560px)]:bottom-3" : "bottom-6"}`}>
       <button type="button" onClick={onActivate} className="panel pop pointer-events-auto flex max-w-full items-center gap-3 px-2 py-1 text-left">
         <span className="t-ui shrink-0 bg-[color:var(--gold)] px-2 py-1 text-[0.75rem] font-bold text-[#2a1a0c]">
           {touch ? "A" : "Enter"}
@@ -134,7 +133,18 @@ export function NearPrompt({ verb, label, onActivate }: { verb: string; label: s
   );
 }
 
-export type ToastMsg = { id: number; icon: IconName; title: string; sub?: string; tone?: "gold" | "sky" | "moss" };
+export type ToastMsg = {
+  id: number;
+  icon: IconName;
+  title: string;
+  sub?: string;
+  tone?: "gold" | "sky" | "moss";
+  /** played the moment the toast actually appears */
+  sound?: Sfx;
+  /** onboarding-style hints: skip if not shown within a few seconds */
+  ephemeral?: boolean;
+  at?: number;
+};
 
 /**
  * One toast at a time, top-centre, auto-advancing. The parent passes null while a
@@ -144,6 +154,12 @@ export type ToastMsg = { id: number; icon: IconName; title: string; sub?: string
 export function ToastView({ toast, onDone }: { toast: ToastMsg | null; onDone: () => void }) {
   useEffect(() => {
     if (!toast) return;
+    // an onboarding hint that couldn't show in time is dropped, not shown late
+    if (toast.ephemeral && Date.now() - (toast.at ?? 0) > 6000) {
+      onDone();
+      return;
+    }
+    if (toast.sound) play(toast.sound);
     const id = window.setTimeout(onDone, 3600);
     return () => window.clearTimeout(id);
   }, [toast, onDone]);
@@ -171,6 +187,7 @@ export function ToastView({ toast, onDone }: { toast: ToastMsg | null; onDone: (
 export function LevelBanner({ level, onDone }: { level: number | null; onDone: () => void }) {
   useEffect(() => {
     if (level === null) return;
+    play("level");
     const id = window.setTimeout(onDone, 2600);
     return () => window.clearTimeout(id);
   }, [level, onDone]);

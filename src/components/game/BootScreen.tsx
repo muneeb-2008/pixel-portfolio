@@ -16,7 +16,7 @@ const TIPS = [
   "Level up by discovering projects, gems and stories.",
 ];
 
-const MIN_MS = 1600; // long enough to read, short enough to never feel slow
+const MIN_MS = 900; // long enough to read, short enough to never feel slow
 const SEGMENTS = 20;
 
 /**
@@ -28,21 +28,24 @@ export function BootScreen({ progress, onContinue }: { progress: number; onConti
   const touch = useInputModeValue() === "touch";
   const [t0] = useState(() => performance.now());
   const [shown, setShown] = useState(0);
+  const shownRef = useRef(0);
   const [tip, setTip] = useState(0);
   const btnRef = useRef<HTMLButtonElement>(null);
   const ready = shown >= 1;
 
-  // eased display progress: never ahead of reality, never faster than MIN_MS
+  // eased display progress: never ahead of reality, never faster than MIN_MS;
+  // the loop stops the moment the bar is full (no endless re-renders)
   useEffect(() => {
     let raf = 0;
+    let cur = shownRef.current;
     const tick = () => {
       const timeCap = Math.min(1, (performance.now() - t0) / MIN_MS);
-      setShown((cur) => {
-        const target = Math.min(progress, timeCap);
-        const next = cur + (target - cur) * 0.18;
-        return target >= 1 && next > 0.99 ? 1 : next;
-      });
-      raf = requestAnimationFrame(tick);
+      const target = Math.min(progress, timeCap);
+      const next = cur + (target - cur) * 0.18;
+      cur = target >= 1 && next > 0.99 ? 1 : next;
+      shownRef.current = cur;
+      setShown(cur);
+      if (cur < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);

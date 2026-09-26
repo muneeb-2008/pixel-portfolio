@@ -33,17 +33,31 @@ export function ProjectPanel({
   district,
   fresh,
   nav,
+  onDiscover,
   onClose,
 }: {
   project: Project;
   district: string;
-  /** first discovery — show the XP reward ribbon */
+  /** first visit — XP is granted once the page has actually been on screen */
   fresh?: boolean;
   /** browsing from the Quest Log: step through projects (also ← / →) */
   nav?: { onPrev: () => void; onNext: () => void; position: string };
+  onDiscover?: () => void;
   onClose: () => void;
 }) {
   const [shot, setShot] = useState(0);
+  const [discovered, setDiscovered] = useState(false);
+
+  // discovery counts after ~2s of actually looking — skimming with Next doesn't farm XP
+  useEffect(() => {
+    if (!fresh) return;
+    const id = window.setTimeout(() => {
+      setDiscovered(true);
+      onDiscover?.();
+    }, 2000);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fresh]);
 
   useEffect(() => {
     if (!nav) return;
@@ -57,30 +71,35 @@ export function ProjectPanel({
   }, [nav]);
 
   return (
-    <Modal title={district} onClose={onClose} variant="paper" width="max-w-3xl">
+    <Modal title={project.title} onClose={onClose} variant="paper" width="max-w-3xl">
+      <p className="t-ui -mt-3 mb-4 text-[0.75rem] text-[color:var(--parchment-ink-2)]">
+        {district} · {project.kind}
+      </p>
       {/* art — 16:9 main image, capped so the page fits short screens */}
       <div className="well relative mb-3">
         <div className="checker flex aspect-[16/9] max-h-[38vh] w-full items-center justify-center overflow-hidden">
           {project.gallery.length ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={shot}
-              src={asset(project.gallery[shot])}
-              alt={`${project.title} — image ${shot + 1} of ${project.gallery.length}`}
-              width={1600}
-              height={900}
-              className="pop h-full w-full object-cover"
-            />
+            <a href={asset(project.gallery[shot])} target="_blank" rel="noopener noreferrer" className="block h-full w-full" title="Open full size">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                key={shot}
+                src={asset(project.gallery[shot])}
+                alt={`${project.title} — image ${shot + 1} of ${project.gallery.length} (opens full size)`}
+                width={1600}
+                height={900}
+                className="pop h-full w-full object-cover"
+              />
+            </a>
           ) : (
             <WorkflowArt />
           )}
         </div>
-        {fresh && (
-          <span className="t-ui absolute right-3 top-3 flex items-center gap-1.5 border-2 border-[color:var(--ink)] bg-[color:var(--moss)] px-2 py-1 text-[0.75rem] font-bold text-[#1d2a12] shadow-[0_3px_0_rgba(0,0,0,0.45)]">
-            <PixelIcon name="star" px={1.5} /> Discovered · +60 XP
-          </span>
-        )}
       </div>
+      {fresh && discovered && (
+        <p className="t-ui pop mb-3 inline-flex items-center gap-1.5 border-2 border-[color:var(--ink)] bg-[#4f7a2f] px-2 py-1 text-[0.75rem] font-bold text-[#f1e2c2]" role="status">
+          <PixelIcon name="star" px={1.5} /> Discovered · +60 XP
+        </p>
+      )}
 
       {/* gallery thumbnails */}
       {project.gallery.length > 1 && (
@@ -105,8 +124,7 @@ export function ProjectPanel({
         </div>
       )}
 
-      <p className="t-ui text-[0.75rem] text-[color:var(--parchment-ink-2)]">{project.kind}</p>
-      <h3 className="t-display mt-1 text-[40px] text-[color:var(--parchment-ink)] [text-wrap:balance]">{project.title}</h3>
+      <h3 className="t-ui mt-1 text-[0.8125rem] font-bold text-[color:var(--parchment-ink)]">Overview</h3>
       <div className="mt-3 flex flex-col gap-3">
         {project.body.map((para) => (
           <p key={para} className="t-body text-[1.0625rem] leading-relaxed text-[color:var(--parchment-ink)] [text-wrap:pretty]">
@@ -114,6 +132,39 @@ export function ProjectPanel({
           </p>
         ))}
       </div>
+
+      {/* case study — Role · Problem · Process · Decision · Outcome (each only if provided) */}
+      {project.caseStudy && (
+        <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+          {(
+            [
+              ["My role", project.caseStudy.role],
+              ["The problem", project.caseStudy.problem],
+              ["Key decision", project.caseStudy.decision],
+              ["Outcome", project.caseStudy.outcome],
+            ] as const
+          )
+            .filter(([, v]) => v)
+            .map(([k, v]) => (
+              <div key={k} className="border-l-4 border-[color:var(--brass)] pl-3">
+                <dt className="t-ui text-[0.75rem] font-bold text-[color:var(--parchment-ink-2)]">{k}</dt>
+                <dd className="t-body mt-1 text-[1rem] leading-relaxed text-[color:var(--parchment-ink)]">{v}</dd>
+              </div>
+            ))}
+          {project.caseStudy.process?.length ? (
+            <div className="border-l-4 border-[color:var(--brass)] pl-3 sm:col-span-2">
+              <dt className="t-ui text-[0.75rem] font-bold text-[color:var(--parchment-ink-2)]">Process</dt>
+              <dd>
+                <ol className="t-body mt-1 flex list-decimal flex-col gap-1 pl-5 text-[1rem] leading-relaxed text-[color:var(--parchment-ink)]">
+                  {project.caseStudy.process.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+      )}
 
       <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tags">
         {project.tags.map((t) => (

@@ -58,11 +58,9 @@ type Overlay =
       | { type: "help" }
       | { type: "log"; focus?: string }
       | { type: "pause" }
-      | { type: "house" }
+      | { type: "house"; pc?: boolean }
     ) & { back?: Overlay });
 
-/** Each district's building intros are narrated by that district's villager. */
-const DISTRICT_NPC: Record<string, string> = { design: "mara", dev: "bolt", agency: "tom" };
 
 const KEY_MAP: Record<string, InputKey> = {
   arrowup: "up",
@@ -134,7 +132,7 @@ export default function Game() {
   }, [save]);
 
   const toast = useCallback((t: Omit<ToastMsg, "id">) => {
-    setToasts((q) => [...q, { ...t, id: Date.now() + Math.random() }]);
+    setToasts((q) => [...q, { ...t, id: Date.now() + Math.random(), at: Date.now() }]);
   }, []);
 
   /* ---------------- level-ups + achievements (diffed, never on load) ---------------- */
@@ -142,14 +140,10 @@ export default function Game() {
   useEffect(() => {
     const prev = prevRef.current;
     if (phase === "play") {
-      if (lvl.level > prev.level) {
-        setLevelBanner(lvl.level);
-        play("level");
-      }
+      if (lvl.level > prev.level) setLevelBanner(lvl.level);
       for (const a of ACHIEVEMENTS) {
         if (unlocked.has(a.id) && !prev.unlocked.has(a.id)) {
-          toast({ icon: a.icon as ToastMsg["icon"], title: `Achievement · ${a.name}`, sub: a.desc, tone: "gold" });
-          play("achieve");
+          toast({ icon: a.icon as ToastMsg["icon"], title: `Achievement · ${a.name}`, sub: a.desc, tone: "gold", sound: "achieve" });
         }
       }
     }
@@ -161,8 +155,8 @@ export default function Game() {
     setSave((s) => (s.visited.includes(id) ? s : { ...s, visited: [...s.visited, id] }));
   }, []);
 
-  const openAbout = useCallback(() => {
-    setOverlay({ type: "house" });
+  const openAbout = useCallback((pc = false) => {
+    setOverlay({ type: "house", pc });
   }, []);
 
   const readAbout = useCallback(() => {
@@ -175,15 +169,11 @@ export default function Game() {
   }, []);
 
   /** Open a project from the Quest Log — closing it returns to the list, row focused. */
-  const openProject = useCallback(
-    (projectId: string) => {
-      const fresh = !saveRef.current.visited.includes(projectId);
-      markVisited(projectId);
-      play("open");
-      setOverlay({ type: "project", projectId, fresh, back: { type: "log", focus: projectId } });
-    },
-    [markVisited],
-  );
+  const openProject = useCallback((projectId: string) => {
+    const fresh = !saveRef.current.visited.includes(projectId);
+    play("open");
+    setOverlay({ type: "project", projectId, fresh, back: { type: "log", focus: projectId } });
+  }, []);
 
   /** Play the iris wipe (unless reduced motion), then run `action` behind it. */
   const withIris = useCallback((action: () => void) => {
@@ -201,27 +191,10 @@ export default function Game() {
     (t: Trigger) => {
       if (t.type === "project" && t.payload) {
         const projectId = t.payload;
-        // repeat visit → skip the NPC intro, open the project straight away
-        if (saveRef.current.visited.includes(projectId)) {
-          withIris(() => setOverlay({ type: "project", projectId, fresh: false }));
-          return;
-        }
-        const project = getProject(projectId);
-        const npc = npcs.find((n) => n.id === DISTRICT_NPC[project?.zone ?? ""]) ?? npcs[0];
-        const title = project?.title ?? "this project";
-        markVisited(projectId);
-        withIris(() =>
-          setOverlay({
-            type: "dialogue",
-            speaker: npc.name,
-            role: npc.role,
-            lines: npc.lines.map((l) => l.replace(/\{project\}/g, title)),
-            portrait: { palette: npc.palette, hat: npc.hat },
-            after: { type: "project", projectId, fresh: true },
-          }),
-        );
+        play("door");
+        setOverlay({ type: "project", projectId, fresh: !saveRef.current.visited.includes(projectId) });
       } else if (t.type === "about") {
-        withIris(openAbout);
+        withIris(() => openAbout());
       } else if (t.type === "contact") {
         play("open");
         openContact();
@@ -238,7 +211,7 @@ export default function Game() {
         setOverlay({ type: "dialogue", speaker: npc.name, role: "Villager", lines: v.lines, portrait: { palette: npc.palette, hat: npc.hat } });
       }
     },
-    [markVisited, openAbout, openContact, withIris, toast],
+    [openAbout, openContact, withIris, toast],
   );
 
   const handlePickup = useCallback(
@@ -273,7 +246,8 @@ export default function Game() {
         villagers,
         npcs,
         banners: Object.fromEntries(projects.map((p) => [p.id, p.banner])),
-        covers: Object.fromEntries(projects.filter((p) => p.gallery[0]).map((p) => [p.id, asset(p.gallery[0])])),
+        // billboards only need tiny thumbnails (96×54) — the full art loads when a project opens
+        covers: Object.fromEntries(projects.filter((p) => p.gallery[0]).map((p) => [p.id, asset(p.gallery[0].replace("/work/", "/work/thumbs/"))])),
       },
       {
         onTrigger: (t) => handlersRef.current.trigger(t),
@@ -286,6 +260,7 @@ export default function Game() {
     engine.setProgress(saveRef.current);
     engine.setAttract(true);
     engine.setNight(nightRef.current, true);
+    engine.setSafeTop(84);
     engineRef.current = engine;
     void engine.start();
     const onResize = () => engine.resize();
@@ -320,6 +295,7 @@ export default function Game() {
         toast({
           icon: "play",
           title: "Welcome, traveler!",
+          ephemeral: true,
           sub: touch ? "Use the D-pad. Walk into a glowing door." : "WASD or arrows to move. Walk into a glowing door.",
           tone: "moss",
         });
@@ -391,7 +367,7 @@ export default function Game() {
       // Enter/Space interact — unless a HUD button has keyboard focus (then it's that button's)
       if ((k === "enter" || k === " ") && !target?.closest?.("button, a")) {
         e.preventDefault();
-        engineRef.current?.interact();
+        if (engineRef.current && !engineRef.current.interact()) play("select");
         return;
       }
       const shortcut: Record<string, () => void> = {
@@ -426,7 +402,9 @@ export default function Game() {
     setOverlay((cur) => (cur && cur.type === "dialogue" && cur.after ? cur.after : null));
   }, []);
   const onDir = useCallback((key: InputKey, on: boolean) => engineRef.current?.setInput(key, on), []);
-  const interact = useCallback(() => engineRef.current?.interact(), []);
+  const interact = useCallback(() => {
+    if (engineRef.current && !engineRef.current.interact()) play("select");
+  }, []);
   const minimapRef = useCallback((el: HTMLCanvasElement | null) => engineRef.current?.attachMinimap(el), []);
   const nextToast = useCallback(() => setToasts((q) => q.slice(1)), []);
   const endBanner = useCallback(() => setLevelBanner(null), []);
@@ -522,7 +500,7 @@ export default function Game() {
                     }
                   : undefined;
               return p ? (
-                <ProjectPanel key={p.id} project={p} district={zoneName(p.id)} fresh={overlay.fresh} nav={nav} onClose={close} />
+                <ProjectPanel key={p.id} project={p} district={zoneName(p.id)} fresh={overlay.fresh} nav={nav} onDiscover={() => markVisited(p.id)} onClose={close} />
               ) : null;
             })()}
           {overlay?.type === "sheet" && (
@@ -539,7 +517,7 @@ export default function Game() {
               unlocked={unlocked}
               focusId={overlay.focus}
               onOpenProject={openProject}
-              onAbout={openAbout}
+              onAbout={() => openAbout(true)}
               onContact={() => openContact()}
               onClose={close}
             />
@@ -554,7 +532,14 @@ export default function Game() {
               onProfile={() => setOverlay({ type: "sheet", back: { type: "house" } })}
               onQuestLog={() => setOverlay({ type: "log", back: { type: "house" } })}
               onContact={() => openContact({ type: "house" })}
-              onExit={() => withIris(() => setOverlay(null))}
+              openPc={overlay.pc}
+              onToggleNight={toggleNight}
+              onExit={() =>
+                withIris(() => {
+                  engineRef.current?.stepOutOf("about");
+                  setOverlay(null);
+                })
+              }
             />
           )}
           {overlay?.type === "pause" && (

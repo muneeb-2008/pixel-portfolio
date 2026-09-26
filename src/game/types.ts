@@ -69,6 +69,14 @@ export type Project = {
   link?: { label: string; url: string };
   /** two short lines painted on the building's sign plate */
   banner: [string, string];
+  /** optional case-study sections — each renders only when filled in */
+  caseStudy?: {
+    role?: string;
+    problem?: string;
+    process?: string[];
+    decision?: string;
+    outcome?: string;
+  };
 };
 
 export type Building = {

@@ -12,11 +12,11 @@ const EXTRA_KEYS = ["c"];
 /** Each skill gets an animated pixel icon — the icon carries the meaning, text is on demand. */
 const SKILL_ICON: Record<string, { icon: IconName; anim: string; color: string }> = {
   uiux: { icon: "cursor", anim: "anim-click", color: "var(--sky)" },
-  product: { icon: "cube", anim: "anim-bob", color: "var(--gold)" },
-  framer: { icon: "bolt", anim: "anim-flash", color: "#b98ae8" },
+  product: { icon: "cube", anim: "anim-bob", color: "var(--brass)" },
+  framer: { icon: "bolt", anim: "anim-flash", color: "var(--gold-hi)" },
   brand: { icon: "pen", anim: "anim-wiggle", color: "var(--ember)" },
   ai: { icon: "sparkle", anim: "anim-spin", color: "var(--moss)" },
-  motion: { icon: "wave", anim: "anim-slide", color: "#e88fc0" },
+  motion: { icon: "wave", anim: "anim-slide", color: "var(--parchment)" },
 };
 
 const PROFILE_ICON: Record<string, IconName> = {
@@ -29,15 +29,12 @@ const PROFILE_ICON: Record<string, IconName> = {
 
 export function CharacterSheet({
   character,
-  level,
-  xpInto,
-  xpNeed,
   onClose,
 }: {
   character: Character;
-  level: number;
-  xpInto: number;
-  xpNeed: number;
+  level?: number;
+  xpInto?: number;
+  xpNeed?: number;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(character.stats[0]?.key ?? "");
@@ -55,17 +52,7 @@ export function CharacterSheet({
             </div>
           </div>
           <p className="t-ui text-center text-[0.9375rem] font-bold text-[color:var(--text)]">{character.name}</p>
-          <div className="w-full">
-            <div className="mb-1 flex items-baseline justify-between">
-              <span className="t-ui bg-[color:var(--gold)] px-1.5 text-[0.75rem] font-bold text-[#2a1a0c]">LV {level}</span>
-              <span className="t-ui text-[0.75rem] text-[color:var(--text-3)]">
-                {xpInto}/{xpNeed} XP
-              </span>
-            </div>
-            <div className="meter" role="progressbar" aria-label="Experience to next level" aria-valuemin={0} aria-valuemax={xpNeed} aria-valuenow={xpInto}>
-              <span style={{ width: `${(xpInto / xpNeed) * 100}%` }} />
-            </div>
-          </div>
+          <p className="t-body -mt-2 text-center text-[0.9375rem] text-[color:var(--gold)] [text-wrap:balance]">{character.title}</p>
           {/* profile as icon chips — one line each */}
           <ul className="flex w-full flex-col gap-2">
             {rows.map((r) => (
@@ -74,7 +61,7 @@ export function CharacterSheet({
                   <PixelIcon name={PROFILE_ICON[r.label] ?? "star"} px={2} />
                 </span>
                 <span className="min-w-0">
-                  <span className="sr-only">{r.label}: </span>
+                  <span className="t-ui block text-[0.75rem] leading-tight text-[color:var(--text-3)]">{r.label}</span>
                   <span className="t-body block text-[0.9375rem] leading-tight text-[color:var(--text)]">{r.value}</span>
                 </span>
               </li>
@@ -105,7 +92,7 @@ export function CharacterSheet({
                   <span className={`${ic.anim} grid h-12 w-12 place-items-center`} style={{ color: ic.color }} aria-hidden>
                     <PixelIcon name={ic.icon} px={4} />
                   </span>
-                  <span className="t-ui text-[0.75rem] leading-tight text-[color:var(--text)]">{s.label}</span>
+                  <span className="t-ui flex min-h-[2.4em] items-center justify-center text-center text-[0.75rem] leading-tight text-[color:var(--text)]">{s.label}</span>
                   {/* level pips */}
                   <span className="flex gap-[2px]" aria-hidden>
                     {Array.from({ length: s.max }, (_, i) => (
@@ -121,13 +108,15 @@ export function CharacterSheet({
             })}
           </div>
 
-          {skill && (
-            <div key={skill.key} className="well pop mt-3 px-3 py-2" aria-live="polite">
-              <p className="t-ui text-[0.75rem] text-[color:var(--sky)]">Class · {skill.klass}</p>
-              <p className="t-display mt-1 text-[24px] leading-tight text-[color:var(--gold-hi)]">{skill.headline}</p>
-              <p className="t-body mt-1 text-[1rem] leading-snug text-[color:var(--text-2)]">{skill.blurb}</p>
-            </div>
-          )}
+          <div className="well mt-3 px-3 py-2" aria-live="polite">
+            {skill && (
+              <div key={skill.key} className="pop">
+                <p className="t-ui text-[0.75rem] text-[color:var(--sky)]">Class · {skill.klass}</p>
+                <p className="t-display mt-1 text-[24px] leading-tight text-[color:var(--gold-hi)]">{skill.headline}</p>
+                <p className="t-body mt-1 text-[1rem] leading-snug text-[color:var(--text-2)]">{skill.blurb}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Modal>

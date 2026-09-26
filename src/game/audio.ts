@@ -2,7 +2,7 @@
  * Tiny chiptune SFX synthesised with WebAudio — no audio files to load.
  * The context is created lazily on the first user gesture (autoplay rules).
  */
-type Sfx = "blip" | "select" | "confirm" | "back" | "door" | "gem" | "level" | "achieve" | "step" | "open";
+export type Sfx = "blip" | "select" | "confirm" | "back" | "door" | "gem" | "level" | "achieve" | "step" | "open";
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;

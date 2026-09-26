@@ -3,6 +3,7 @@ import { character } from "@/game/data/character";
 import { contact } from "@/game/data/contact";
 import { projects } from "@/game/data/projects";
 import { world } from "@/game/data/world";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Plain-HTML portfolio, rendered on the server from the same data files the
@@ -14,6 +15,8 @@ export function PortfolioIndex() {
     "@context": "https://schema.org",
     "@type": "Person",
     name: character.name,
+    url: SITE_URL,
+    image: `${SITE_URL}og.jpg`,
     jobTitle: character.title,
     email: `mailto:${contact.email}`,
     worksFor: { "@type": "Organization", name: "Xtarc", url: "https://xtarc.agency/" },
@@ -25,7 +28,7 @@ export function PortfolioIndex() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <noscript>
-        <style>{`#portfolio-index{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:0!important;white-space:normal!important;overflow:auto!important;max-width:44rem;padding:2rem 1.25rem}body{overflow:auto!important}`}</style>
+        <style>{`.game-loading{display:none!important}#portfolio-index{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:0!important;white-space:normal!important;overflow:auto!important;max-width:44rem;padding:2rem 1.25rem}body{overflow:auto!important}`}</style>
       </noscript>
       {/* links are out of the Tab order: sighted keyboard users would land on invisible
           targets. Screen readers still reach them in browse mode. */}

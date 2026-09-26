@@ -14,7 +14,7 @@ export const villagers: Villager[] = [
     lines: [
       "Welcome to town, traveler! Every building here holds a project.",
       "Lost? Your Quest Log (L) lists every one — you can open them from there too.",
-      "Psst… there are 8 gems hidden around town. I've only ever found one.",
+      "Psst… 8 gems are hidden around town — each one tucked behind a tree. Walk round the back and watch for a glint.",
     ],
   },
   {
@@ -34,7 +34,7 @@ export const villagers: Villager[] = [
     range: 3,
     lines: [
       "Dev District! Code, tools, automations — the works.",
-      "Heard there's a gem down by the pond. Can't swim, though.",
+      "Heard there are gems behind the trees out east. I'm too busy delivering to look.",
     ],
   },
   {

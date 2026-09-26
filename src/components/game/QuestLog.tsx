@@ -71,10 +71,10 @@ export function QuestLog({
   const found = projects.filter((p) => visited.has(p.id)).length;
   const districts = world.zones.filter((z) => z.kind !== "hub");
 
-  const tabs: { id: Tab; label: string; count: string }[] = [
-    { id: "projects", label: "Projects", count: `${found}/${projects.length}` },
-    { id: "achievements", label: "Achievements", count: `${unlocked.size}/${ACHIEVEMENTS.length}` },
-    { id: "treasures", label: "Treasures", count: `${save.gems.length}/${gems.length}` },
+  const tabs: { id: Tab; label: string; short: string; count: string }[] = [
+    { id: "projects", label: "Projects", short: "Projects", count: `${found}/${projects.length}` },
+    { id: "achievements", label: "Achievements", short: "Badges", count: `${unlocked.size}/${ACHIEVEMENTS.length}` },
+    { id: "treasures", label: "Treasures", short: "Gems", count: `${save.gems.length}/${gems.length}` },
   ];
 
   return (
@@ -96,7 +96,7 @@ export function QuestLog({
         role="tablist"
         aria-label="Quest Log sections"
         onKeyDown={onTabKey}
-        className="mb-4 flex gap-1 overflow-x-auto border-b-2 border-[color:var(--ink)] [scrollbar-width:none]"
+        className="mb-4 flex gap-1 overflow-x-auto border-b-2 border-[color:var(--ink)] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(90deg,#000_88%,transparent)]"
       >
         {tabs.map((t) => (
           <button
@@ -113,7 +113,8 @@ export function QuestLog({
             }}
             className="tab shrink-0 whitespace-nowrap"
           >
-            {t.label} <span className="text-[color:var(--text-3)]">{t.count}</span>
+            <span className="hidden sm:inline">{t.label}</span>
+            <span className="sm:hidden">{t.short}</span> <span className="text-[color:var(--text-3)]">{t.count}</span>
           </button>
         ))}
       </div>
