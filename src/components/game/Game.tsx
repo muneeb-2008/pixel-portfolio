@@ -96,7 +96,7 @@ export default function Game() {
   const [save, setSave] = useState<Save>(loadSave);
   const saveRef = useRef(save);
   const [near, setNear] = useState<Trigger | null>(null);
-  const [draft, setDraft] = useState<LetterDraft>({ name: "", msg: "" });
+  const [draft, setDraft] = useState<LetterDraft>({ name: "", email: "", msg: "" });
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
   const [levelBanner, setLevelBanner] = useState<number | null>(null);
   const [iris, setIris] = useState<{ x: number; y: number; action: () => void } | null>(null);
