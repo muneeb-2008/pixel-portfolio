@@ -34,7 +34,7 @@ export function TitleScreen({
 
   const mainItems = [
     ...(canContinue ? [{ label: "Continue", onSelect: onContinue }] : []),
-    { label: "New Game", onSelect: () => (canContinue ? setConfirmNew(true) : onNewGame()) },
+    { label: canContinue ? "New Game" : "Enter the World", onSelect: () => (canContinue ? setConfirmNew(true) : onNewGame()) },
     { label: "Project List", onSelect: onList, hint: "Quest Log" },
     { label: "Contact", onSelect: onContact, hint: "Email" },
     { label: "How to Play", onSelect: onHelp },
@@ -70,16 +70,24 @@ export function TitleScreen({
         <div className="flex flex-col items-start gap-8 [@media(max-height:560px)]:flex-row [@media(max-height:560px)]:items-center [@media(max-height:560px)]:gap-8">
           <div className="slide-down">
             <p className="t-ui text-[0.8125rem] tracking-[0.2em] text-[color:var(--gold-hi)]">A Portfolio Adventure</p>
-            <h2 id="title-heading" className="t-logo mt-3 text-[80px] sm:text-[120px] [@media(max-height:560px)]:text-[60px]">
-              Pixel
-              <br />
-              Portfolio
+            <h2 id="title-heading" className="t-logo mt-3 text-[70px] sm:text-[110px] [@media(max-height:560px)]:text-[50px]">
+              {character.name.split(" ").map((w, i) => (
+                <span key={w} className="block">
+                  {i > 0 && <span className="sr-only"> </span>}
+                  {w}
+                </span>
+              ))}
             </h2>
-            <p className="t-body mt-5 max-w-md text-[1.125rem] text-[color:var(--text)] [text-wrap:balance] [@media(max-height:560px)]:mt-2">
-              <span className="t-ui text-[0.875rem] text-[color:var(--gold)]">{character.name}</span>
-              <span className="mx-2 text-[color:var(--text-3)]">·</span>
+            <p className="t-ui mt-5 max-w-lg text-[0.875rem] font-bold text-[color:var(--gold)] [text-wrap:balance] [@media(max-height:560px)]:mt-2">
               {character.title}
             </p>
+            <div className="mt-3 flex max-w-lg flex-col gap-2 [@media(max-height:560px)]:hidden">
+              {character.intro.map((l) => (
+                <p key={l} className="t-body text-[1.0625rem] leading-snug text-[color:var(--text)] [text-wrap:pretty]">
+                  {l}
+                </p>
+              ))}
+            </div>
           </div>
 
           <div className="panel pop w-full max-w-sm px-2 py-3">
@@ -104,7 +112,7 @@ export function TitleScreen({
           <p className="t-ui text-[0.75rem] text-[color:var(--text-2)]">
             {touch ? "Tap an option to begin" : "Arrow keys choose · Enter selects"}
           </p>
-          <p className="t-ui text-[0.75rem] text-[color:var(--text-3)]">© {character.name} · v1.0</p>
+          <p className="t-ui text-[0.75rem] text-[color:var(--text-3)]">© 2026 {character.name}</p>
         </div>
       </div>
     </div>

@@ -26,13 +26,21 @@ export type Stat = {
   label: string;
   level: number; // 0..max
   max: number;
+  /** one-line hook, e.g. "Design that makes sense." */
+  headline: string;
   blurb: string;
+  /** RPG class this skill unlocks, e.g. "Product Designer" */
+  klass: string;
 };
 
 export type Character = {
   name: string;
   title: string;
   tagline: string;
+  /** hero copy shown on the title screen */
+  intro: string[];
+  /** "Player profile" rows on the character sheet */
+  profile: { label: string; value: string }[];
   palette: Palette;
   stats: Stat[];
 };
@@ -50,12 +58,17 @@ export type Npc = {
 export type Project = {
   id: string;
   zone: ZoneKind;
-  title: string; // PLACEHOLDER
-  kind: string; // PLACEHOLDER
-  year: string; // PLACEHOLDER
-  blurb: string; // PLACEHOLDER
-  image: string; // PLACEHOLDER image URL/slot ("" = empty slot)
-  tags: string[]; // PLACEHOLDER
+  title: string;
+  kind: string;
+  /** paragraphs of the write-up */
+  body: string[];
+  /** 16:9 images under /public (first = cover); [] = styled empty slot */
+  gallery: string[];
+  tags: string[];
+  /** external case study / site */
+  link?: { label: string; url: string };
+  /** two short lines painted on the building's sign plate */
+  banner: [string, string];
 };
 
 export type Building = {

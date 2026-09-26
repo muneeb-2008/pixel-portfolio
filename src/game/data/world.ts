@@ -30,22 +30,20 @@ export const world: WorldData = {
     { x: 5, y: 29, w: 6, h: 2 }, // …then round to its south-facing door
     { x: 40, y: 10, w: 2, h: 9 },
     { x: 47, y: 10, w: 2, h: 9 },
-    { x: 41, y: 21, w: 2, h: 10 }, // dev-3: down the side…
-    { x: 41, y: 29, w: 5, h: 2 }, // …then round to its door (stops short of the pond)
+    { x: 44, y: 21, w: 2, h: 8 }, // dev district: a lane down to the pond
   ],
 
   water: [{ x: 46, y: 30, w: 5, h: 4 }],
 
   // `skin` picks the exterior to match each project's vibe (all 5 skins used).
   buildings: [
-    { id: "b-d1", projectId: "design-1", style: "design", skin: "studio", tx: 4, ty: 6, w: 4, h: 4 },
-    { id: "b-d2", projectId: "design-2", style: "design", skin: "store", tx: 11, ty: 6, w: 4, h: 4 },
-    { id: "b-d3", projectId: "design-3", style: "design", skin: "shop", tx: 7, ty: 25, w: 4, h: 4 },
-    { id: "b-v1", projectId: "dev-1", style: "dev", skin: "workshop", tx: 39, ty: 6, w: 4, h: 4 },
-    { id: "b-v2", projectId: "dev-2", style: "dev", skin: "shop", tx: 46, ty: 6, w: 4, h: 4 },
-    { id: "b-v3", projectId: "dev-3", style: "dev", skin: "studio", tx: 43, ty: 25, w: 4, h: 4 },
-    { id: "b-a1", projectId: "agency-1", style: "agency", skin: "tower", tx: 22, ty: 3, w: 4, h: 4 },
-    { id: "b-a2", projectId: "agency-2", style: "agency", skin: "store", tx: 28, ty: 3, w: 4, h: 4 },
+    { id: "b-d1", projectId: "mortime-dashboard", style: "design", skin: "studio", tx: 4, ty: 6, w: 4, h: 4 },
+    { id: "b-d2", projectId: "auton8", style: "design", skin: "store", tx: 11, ty: 6, w: 4, h: 4 },
+    { id: "b-d3", projectId: "soal-labs", style: "design", skin: "shop", tx: 7, ty: 25, w: 4, h: 4 },
+    { id: "b-v1", projectId: "pixel-portfolio", style: "dev", skin: "workshop", tx: 39, ty: 6, w: 4, h: 4 },
+    { id: "b-v2", projectId: "design-build", style: "dev", skin: "studio", tx: 46, ty: 6, w: 4, h: 4 },
+    { id: "b-a1", projectId: "mortime", style: "agency", skin: "tower", tx: 22, ty: 3, w: 4, h: 4 },
+    { id: "b-a2", projectId: "xtarc", style: "agency", skin: "store", tx: 28, ty: 3, w: 4, h: 4 },
   ],
 
   about: { tx: 20, ty: 14, w: 4, h: 4 },

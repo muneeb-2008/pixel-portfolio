@@ -78,9 +78,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "agency", name: "Agency Insider", desc: "Visit every Agency Hall project.", icon: "flag", test: (s) => districtDone(s, "agency") },
   { id: "gems", name: "Treasure Hunter", desc: `Find all ${gems.length} hidden gems.`, icon: "gem", test: (s) => s.gems.length === gems.length },
   { id: "talk", name: "Town Gossip", desc: "Chat with every villager.", icon: "chat", test: (s) => s.talked.length === villagers.length },
-  { id: "about", name: "Know the Maker", desc: "Hear the innkeeper's story.", icon: "book", test: (s) => s.about },
+  { id: "about", name: "Know the Maker", desc: "Hear Muneeb's story at the Traveler's Rest.", icon: "book", test: (s) => s.about },
   { id: "mail", name: "Pen Pal", desc: "Open the mailbox.", icon: "mail", test: (s) => s.mail },
-  { id: "all", name: "Legend of the Town", desc: "Discover every project.", icon: "crown", test: (s) => s.visited.length === projects.length },
+  { id: "all", name: "World Complete", desc: "Discover every project. You made it.", icon: "crown", test: (s) => s.visited.length === projects.length },
 ];
 
 export const unlockedIds = (s: Save) => ACHIEVEMENTS.filter((a) => a.test(s)).map((a) => a.id);

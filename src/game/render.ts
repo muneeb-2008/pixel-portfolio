@@ -424,11 +424,11 @@ function makeObject(
   return { x, y, w, h, baseY, canvas: cv, texts };
 }
 
-/** Dashed-border "LOGO / PLACEHOLDER" banner mounted above a building. */
-function buildingLogo(ctx: CanvasRenderingContext2D, b: Building): WorldText[] {
+/** Sign plate mounted above a building: project name + a short descriptor. */
+function buildingLogo(ctx: CanvasRenderingContext2D, b: Building, lines: [string, string]): WorldText[] {
   const cx = (b.tx + b.w / 2) * T;
   const roofTop = b.ty * T;
-  const bw = 52;
+  const bw = 56;
   const bh = 19;
   const lx = Math.round(cx - bw / 2);
   const ly = roofTop - bh - 2;
@@ -447,8 +447,8 @@ function buildingLogo(ctx: CanvasRenderingContext2D, b: Building): WorldText[] {
   ctx.setLineDash([]);
   ctx.restore();
   return [
-    { text: "LOGO", x: cx, y: ly + 7, size: 6, color: C.accent3 },
-    { text: "PLACEHOLDER", x: cx, y: ly + 14, size: 4, color: "#cdb994" },
+    { text: lines[0], x: cx, y: ly + 7, size: 6, color: C.accent3 },
+    { text: lines[1], x: cx, y: ly + 14, size: 4, color: "#cdb994" },
   ];
 }
 
@@ -507,7 +507,7 @@ function mailbox(ctx: CanvasRenderingContext2D, gx: number, gy: number) {
 }
 
 /** Buildings, inn, trees, signs and mailbox as depth-sortable objects. */
-export function buildObjects(world: WorldData): WorldObject[] {
+export function buildObjects(world: WorldData, banners: Record<string, [string, string]> = {}): WorldObject[] {
   const objs: WorldObject[] = [];
   const LOGO_H = 24; // banner + flag headroom above a building
 
@@ -515,7 +515,7 @@ export function buildObjects(world: WorldData): WorldObject[] {
     objs.push(
       makeObject(b.tx * T, b.ty * T - LOGO_H, b.w * T, b.h * T + LOGO_H + 4, (b.ty + b.h) * T, (ctx) => {
         drawBuilding(ctx, b.tx, b.ty, b.w, b.h, b.style, b.skin);
-        return buildingLogo(ctx, b);
+        return buildingLogo(ctx, b, banners[b.projectId] ?? ["PROJECT", ""]);
       }),
     ),
   );

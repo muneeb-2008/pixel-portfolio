@@ -35,9 +35,15 @@ export function ContactForm({
   )}&body=${encodeURIComponent(draft.msg)}`;
 
   return (
-    <Modal title="Mailbox" onClose={onClose} width="max-w-lg">
-      <h3 className="t-ui text-[0.9375rem] font-bold text-[color:var(--text)]">{contact.heading}</h3>
-      <p className="t-body mt-2 text-[1rem] leading-relaxed text-[color:var(--text-2)]">{contact.note}</p>
+    <Modal title="The Exit" onClose={onClose} width="max-w-lg">
+      <div className="flex flex-col gap-1.5">
+        {contact.lines.map((l) => (
+          <p key={l} className="t-body text-[1rem] leading-relaxed text-[color:var(--text-2)]">
+            {l}
+          </p>
+        ))}
+      </div>
+      <h3 className="t-display mt-4 text-[30px] text-[color:var(--gold)]">{contact.heading}</h3>
 
       <div className="mt-5 flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">
@@ -72,6 +78,14 @@ export function ContactForm({
           <a href={`mailto:${contact.email}`} className="whitespace-nowrap text-[color:var(--sky)] underline underline-offset-4">
             {contact.email}
           </a>
+        </p>
+        <p className="t-body -mt-2 flex flex-wrap gap-x-4 text-[1rem]">
+          {contact.links.map((l) => (
+            <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="text-[color:var(--sky)] underline underline-offset-4">
+              {l.label}
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          ))}
         </p>
         <div className="flex gap-2 sm:justify-end">
           <button type="button" onClick={onClose} className="btn btn-wood flex-1 sm:flex-none">

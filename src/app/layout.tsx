@@ -26,9 +26,9 @@ const body = Pixelify_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Pixel Portfolio — Explore the World",
+  title: "Muneeb Qureshi — Product Designer · Pixel Portfolio",
   description:
-    "A gamified pixel-art RPG portfolio. Explore districts, meet NPCs, and discover projects.",
+    "Muneeb Qureshi — Product Designer, UI/UX Designer and Framer Developer at Xtarc. Explore a pixel-art world to discover projects like Mortime, Auton8 and Soal Labs.",
 };
 
 export const viewport: Viewport = {

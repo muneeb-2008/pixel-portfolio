@@ -7,7 +7,6 @@ import { character } from "@/game/data/character";
 import { npcs } from "@/game/data/npcs";
 import { getProject, projects } from "@/game/data/projects";
 import { about } from "@/game/data/about";
-import { innkeeperPortrait } from "@/game/data/contact";
 import { gems } from "@/game/data/collectibles";
 import { villagers } from "@/game/data/villagers";
 import {
@@ -149,7 +148,7 @@ export default function Game() {
 
   const openAbout = useCallback(() => {
     setSave((s) => (s.about ? s : { ...s, about: true }));
-    setOverlay({ type: "dialogue", speaker: about.speaker, role: "Traveler's Rest", lines: about.lines, portrait: innkeeperPortrait });
+    setOverlay({ type: "dialogue", speaker: about.speaker, role: about.place, lines: about.lines, portrait: { palette: character.palette, hat: "none" } });
   }, []);
 
   const openContact = useCallback(() => {
@@ -249,7 +248,7 @@ export default function Game() {
     if (!canvas) return;
     const engine = new Engine(
       canvas,
-      { world, character, gems, villagers, npcs },
+      { world, character, gems, villagers, npcs, banners: Object.fromEntries(projects.map((p) => [p.id, p.banner])) },
       {
         onTrigger: (t) => handlersRef.current.trigger(t),
         onNear: setNear,

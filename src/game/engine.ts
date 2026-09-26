@@ -37,6 +37,8 @@ export type EngineContent = {
   gems: Gem[];
   villagers: Villager[];
   npcs: Npc[];
+  /** projectId → two-line building sign */
+  banners?: Record<string, [string, string]>;
 };
 
 const T = 16;
@@ -162,7 +164,7 @@ export class Game {
     this.staticCanvas = buildStaticWorld(this.world);
     report(0.55);
     await nextFrame();
-    this.objects = buildObjects(this.world);
+    this.objects = buildObjects(this.world, this.content.banners);
     report(0.8);
     await nextFrame();
     // prewarm every sprite frame so the first steps never hitch

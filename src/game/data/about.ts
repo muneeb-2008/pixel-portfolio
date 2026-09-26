@@ -1,15 +1,16 @@
 /**
- * About Me — presented as an in-game dialogue conversation (not a bio page).
- * PLACEHOLDER copy; the speaker is a friendly innkeeper who talks about you.
+ * About — told in the first person inside the Traveler's Rest (the inn in the
+ * town square), as an in-game conversation.
  */
 export const about = {
-  speaker: "Innkeeper",
+  speaker: "Muneeb",
+  place: "The Traveler's Rest",
   lines: [
-    "Ahh, you've wandered into the Traveler's Rest.",
-    "You're asking about the one who built this world?",
-    "PLACEHOLDER — a designer, a developer, and an agency operator, all in one.",
-    "Equal parts pixel-pusher and problem-solver.",
-    "Wanders between Design, Development, and the Agency Hall as the work demands.",
-    "Replace this text with your real story — but keep the charm, eh?",
+    "So, you found my corner of the internet.",
+    "I'm Muneeb, a designer focused on digital experiences across products, websites, and brands.",
+    "I move between Figma, Framer, design systems, interactions, and AI-assisted workflows depending on what the project needs.",
+    "At Xtarc, I work across real client projects, helping turn complex ideas into products and websites that feel simple, clear, and considered.",
+    "I care about the details, but I care even more about whether the design solves the right problem.",
+    "Design → Systems → Build → Ship.",
   ],
 };
