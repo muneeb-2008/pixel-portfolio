@@ -3,7 +3,7 @@ import type { Npc } from "@/game/types";
 /**
  * NPC pool. One is chosen at random each time a project door is entered, so
  * encounters feel varied. `{project}` in a line is replaced with the project
- * title at runtime. Dialogue is PLACEHOLDER flavour text — edit freely.
+ * title at runtime.
  */
 export const npcs: Npc[] = [
   {
@@ -20,9 +20,9 @@ export const npcs: Npc[] = [
       outline: "#141019",
     },
     lines: [
-      "Oh! A visitor! Welcome, welcome.",
-      "This here is “{project}”. Took ages, that one.",
-      "Go on — take a proper look inside!",
+      "Oh, a visitor. Welcome.",
+      "This is “{project}”. Real client, real problem.",
+      "Go on in. The whole story is inside.",
     ],
   },
   {
@@ -39,9 +39,9 @@ export const npcs: Npc[] = [
       outline: "#120f18",
     },
     lines: [
-      "You seek the story behind “{project}”?",
-      "Every pixel here was placed with intent.",
-      "Study it well, traveler.",
+      "Curious about “{project}”?",
+      "The details matter here, but the problem mattered more.",
+      "Take your time with it.",
     ],
   },
   {
@@ -58,9 +58,9 @@ export const npcs: Npc[] = [
       outline: "#141019",
     },
     lines: [
-      "Fast! You want the quick version of “{project}”?",
-      "Great work, shipped on time. Boom.",
-      "Details are inside — gotta run!",
+      "Want the short version of “{project}”?",
+      "Complex idea in, clear product out.",
+      "The rest is inside. Have a look.",
     ],
   },
   {
@@ -77,9 +77,9 @@ export const npcs: Npc[] = [
       outline: "#14100a",
     },
     lines: [
-      "Hmph. So you found “{project}”.",
-      "Solid craft. I don't say that often.",
-      "…Well? The door's open. In you go.",
+      "So you found “{project}”.",
+      "Simple on the surface. A lot of thinking underneath.",
+      "The door's open. In you go.",
     ],
   },
 ];

@@ -75,9 +75,9 @@ export function ProjectPanel({
       <p className="t-ui -mt-3 mb-4 text-[0.75rem] text-[color:var(--parchment-ink-2)]">
         {district} · {project.kind}
       </p>
-      {/* art — 16:9 main image, capped so the page fits short screens */}
-      <div className="well relative mb-3">
-        <div className="checker flex aspect-[16/9] max-h-[38vh] w-full items-center justify-center overflow-hidden">
+      {/* art — true 16:9 frame; on short screens it narrows (never crops) so the page still fits */}
+      <div className="well relative mx-auto mb-3 w-full max-w-[calc(58vh*16/9)]">
+        <div className="checker flex aspect-[16/9] w-full items-center justify-center overflow-hidden">
           {project.gallery.length ? (
             <a href={asset(project.gallery[shot])} target="_blank" rel="noopener noreferrer" className="block h-full w-full" title="Open full size">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,7 +87,7 @@ export function ProjectPanel({
                 alt={`${project.title} — image ${shot + 1} of ${project.gallery.length} (opens full size)`}
                 width={1600}
                 height={900}
-                className="pop h-full w-full object-cover"
+                className="pop h-full w-full object-contain"
               />
             </a>
           ) : (
